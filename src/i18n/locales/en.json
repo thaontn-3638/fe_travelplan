@@ -1,0 +1,64 @@
+{
+  "common": {
+    "appName": "WanderPlan"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "loginSubtitle": "Sign in to continue planning your next trip",
+    "createAccount": "Create your account",
+    "registerSubtitle": "Sign up to start planning your trips",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "fullName": "Full name",
+    "phoneNumber": "Phone number",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "createAccountAction": "Create account",
+    "creatingAccount": "Creating account…",
+    "demoCredentials": "Demo credentials: admin@wanderplan.com / password123",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Enter a valid email address",
+    "emailMaxLength": "Email must be at most {{max}} characters",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordMaxLength": "Password must be at most {{max}} characters",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordMismatch": "Passwords do not match",
+    "fullNameRequired": "Full name is required",
+    "fullNameMaxLength": "Full name must be at most {{max}} characters",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Enter a valid phone number",
+    "toggleToRegister": "Don't have an account? Create one",
+    "toggleToLogin": "Already have an account? Sign in",
+    "rememberMe": "Remember me",
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "welcome": {
+    "heroTitle": "Plan every trip, together, in one place",
+    "heroSubtitle": "WanderPlan brings your itinerary, budget, and travel companions into a single collaborative board — no more scattered spreadsheets and chat threads.",
+    "getStarted": "Get started free",
+    "feature1Title": "Discover places",
+    "feature1Desc": "Search and save destinations with ratings, prices, and photos in rich cards.",
+    "feature2Title": "Drag-and-drop itinerary",
+    "feature2Desc": "Organize your days on a Kanban-style board and catch time conflicts instantly.",
+    "feature3Title": "Split expenses fairly",
+    "feature3Desc": "Track who paid what and settle up automatically, updated in real time.",
+    "footer": "© 2026 WanderPlan. Built for travelers who plan together."
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}",
+    "overview": "Here's an overview of your upcoming trips.",
+    "noTrips": "No trips yet",
+    "noTripsDescription": "Your planned trips will show up here once trip management ships in a later sprint."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "ja": "日本語",
+    "vi": "Tiếng Việt"
+  }
+}

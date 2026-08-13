@@ -1,0 +1,94 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "email": "admin@wanderplan.com",
+      "password": "$2b$10$eO8OywzLjgCUY.fBcPYgbOxyrsgssDjngLdZ78Y1JhhHzCm9RrVWG",
+      "fullName": "Admin User",
+      "phoneNumber": "+84901234567",
+      "mockToken": "mock-jwt-token-12345"
+    },
+    {
+      "id": "nb3fbQt2Mhk",
+      "email": "thao@gmail.com",
+      "password": "$2b$10$D8HPRHjv0H.I5TSUG0OzI.jSle5AZliqxic8MAT8p7maNYzWWZrPu",
+      "fullName": "Thao",
+      "phoneNumber": "07084621602",
+      "mockToken": "mock-jwt-token-7tc1zfelnrn"
+    },
+    {
+      "id": "9cCnRJ9YEqc",
+      "email": "thao2@gmail.com",
+      "password": "$2b$10$D8HPRHjv0H.I5TSUG0OzI.jSle5AZliqxic8MAT8p7maNYzWWZrPu",
+      "fullName": "Thao Nguyen",
+      "phoneNumber": "07084621602",
+      "mockToken": "mock-jwt-token-n0tah7mgxzs"
+    }
+  ],
+  "authMessages": {
+    "en": {
+      "accountNotFound": "No account found with this email.",
+      "incorrectPassword": "Incorrect password.",
+      "emailAlreadyExists": "Email already exists.",
+      "serverUnreachable": "Unable to reach the authentication server.",
+      "registrationFailed": "Unable to create account."
+    },
+    "ja": {
+      "accountNotFound": "このメールアドレスのアカウントが見つかりません。",
+      "incorrectPassword": "パスワードが正しくありません。",
+      "emailAlreadyExists": "このメールアドレスはすでに登録されています。",
+      "serverUnreachable": "認証サーバーに接続できません。",
+      "registrationFailed": "アカウントを作成できませんでした。"
+    },
+    "vi": {
+      "accountNotFound": "Không tìm thấy tài khoản với email này.",
+      "incorrectPassword": "Mật khẩu không đúng.",
+      "emailAlreadyExists": "Email này đã được sử dụng.",
+      "serverUnreachable": "Không thể kết nối đến máy chủ xác thực.",
+      "registrationFailed": "Không thể tạo tài khoản."
+    }
+  },
+  "places": [
+    {
+      "id": "p1",
+      "title": "Tokyo Tower",
+      "coverUrl": "https://example.com/tokyo-tower.jpg",
+      "price": 2000,
+      "rating": 4.5
+    }
+  ],
+  "trips": [
+    {
+      "id": "t1",
+      "name": "Japan Summer Trip",
+      "budget": 50000,
+      "days": [
+        {
+          "id": "d1",
+          "date": "2026-08-01",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "flight",
+              "title": "Flight to NRT",
+              "flightNo": "JL123",
+              "startTime": "2026-08-01T08:00:00Z",
+              "endTime": "2026-08-01T14:00:00Z",
+              "cost": 15000
+            },
+            {
+              "id": "a2",
+              "type": "place",
+              "title": "Tokyo Tower",
+              "placeId": "p1",
+              "startTime": "2026-08-01T16:00:00Z",
+              "endTime": "2026-08-01T18:00:00Z",
+              "cost": 2000
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

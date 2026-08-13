@@ -1,0 +1,64 @@
+{
+  "common": {
+    "appName": "WanderPlan"
+  },
+  "auth": {
+    "welcomeBack": "Chào mừng trở lại",
+    "loginSubtitle": "Đăng nhập để tiếp tục lên kế hoạch cho chuyến đi tiếp theo",
+    "createAccount": "Tạo tài khoản của bạn",
+    "registerSubtitle": "Đăng ký để bắt đầu lên kế hoạch cho chuyến đi",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "fullName": "Họ và tên",
+    "phoneNumber": "Số điện thoại",
+    "signIn": "Đăng nhập",
+    "signingIn": "Đang đăng nhập…",
+    "createAccountAction": "Tạo tài khoản",
+    "creatingAccount": "Đang tạo tài khoản…",
+    "demoCredentials": "Tài khoản demo: admin@wanderplan.com / password123",
+    "emailRequired": "Vui lòng nhập email",
+    "emailInvalid": "Vui lòng nhập một địa chỉ email hợp lệ",
+    "emailMaxLength": "Email không được vượt quá {{max}} ký tự",
+    "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+    "passwordMaxLength": "Mật khẩu không được vượt quá {{max}} ký tự",
+    "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+    "passwordMismatch": "Mật khẩu xác nhận không khớp",
+    "fullNameRequired": "Vui lòng nhập họ và tên",
+    "fullNameMaxLength": "Họ và tên không được vượt quá {{max}} ký tự",
+    "phoneRequired": "Vui lòng nhập số điện thoại",
+    "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ",
+    "toggleToRegister": "Chưa có tài khoản? Tạo tài khoản mới",
+    "toggleToLogin": "Đã có tài khoản? Đăng nhập",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+  },
+  "welcome": {
+    "heroTitle": "Lên kế hoạch mọi chuyến đi, cùng nhau, trong một nơi duy nhất",
+    "heroSubtitle": "WanderPlan gom lịch trình, ngân sách và bạn đồng hành vào một bảng làm việc chung — không còn rải rác trên nhiều file Excel hay đoạn chat.",
+    "getStarted": "Bắt đầu miễn phí",
+    "feature1Title": "Khám phá địa điểm",
+    "feature1Desc": "Tìm kiếm và lưu địa điểm với đánh giá, giá tham khảo và hình ảnh trực quan.",
+    "feature2Title": "Kéo thả lịch trình",
+    "feature2Desc": "Sắp xếp lịch trình theo dạng bảng Kanban và tự động phát hiện xung đột thời gian.",
+    "feature3Title": "Chia tiền công bằng",
+    "feature3Desc": "Theo dõi ai đã trả bao nhiêu và tự động tính toán số tiền cần thanh toán, cập nhật theo thời gian thực.",
+    "footer": "© 2026 WanderPlan. Dành cho những người lên kế hoạch du lịch cùng nhau."
+  },
+  "dashboard": {
+    "welcome": "Chào mừng trở lại, {{name}}",
+    "overview": "Đây là tổng quan các chuyến đi sắp tới của bạn.",
+    "noTrips": "Chưa có chuyến đi nào",
+    "noTripsDescription": "Các chuyến đi bạn lên kế hoạch sẽ hiển thị ở đây khi tính năng quản lý chuyến đi ra mắt ở sprint sau."
+  },
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "logout": "Đăng xuất"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "en": "English",
+    "ja": "日本語",
+    "vi": "Tiếng Việt"
+  }
+}

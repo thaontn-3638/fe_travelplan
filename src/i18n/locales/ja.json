@@ -1,0 +1,64 @@
+{
+  "common": {
+    "appName": "WanderPlan"
+  },
+  "auth": {
+    "welcomeBack": "おかえりなさい",
+    "loginSubtitle": "次の旅行の計画を続けるにはサインインしてください",
+    "createAccount": "アカウントを作成",
+    "registerSubtitle": "旅行の計画を始めるには新規登録してください",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード（確認）",
+    "fullName": "氏名",
+    "phoneNumber": "電話番号",
+    "signIn": "サインイン",
+    "signingIn": "サインイン中…",
+    "createAccountAction": "アカウントを作成",
+    "creatingAccount": "アカウントを作成中…",
+    "demoCredentials": "デモ用アカウント: admin@wanderplan.com / password123",
+    "emailRequired": "メールアドレスを入力してください",
+    "emailInvalid": "正しいメールアドレスを入力してください",
+    "emailMaxLength": "メールアドレスは{{max}}文字以内で入力してください",
+    "passwordMinLength": "パスワードは6文字以上で入力してください",
+    "passwordMaxLength": "パスワードは{{max}}文字以内で入力してください",
+    "confirmPasswordRequired": "パスワード（確認）を入力してください",
+    "passwordMismatch": "パスワードが一致しません",
+    "fullNameRequired": "氏名を入力してください",
+    "fullNameMaxLength": "氏名は{{max}}文字以内で入力してください",
+    "phoneRequired": "電話番号を入力してください",
+    "phoneInvalid": "正しい電話番号を入力してください",
+    "toggleToRegister": "アカウントをお持ちでない方はこちら",
+    "toggleToLogin": "すでにアカウントをお持ちの方はこちら",
+    "rememberMe": "ログイン状態を保存する",
+    "sessionExpired": "セッションの有効期限が切れました。再度サインインしてください。"
+  },
+  "welcome": {
+    "heroTitle": "旅程・予算・仲間をひとつにまとめて計画しよう",
+    "heroSubtitle": "WanderPlanなら、旅程表・予算管理・旅の仲間との調整をひとつのボードで完結できます。バラバラなスプレッドシートやチャットはもう不要です。",
+    "getStarted": "無料で始める",
+    "feature1Title": "行き先を探す",
+    "feature1Desc": "評価・価格・写真つきのリッチなカードで行き先を検索・保存できます。",
+    "feature2Title": "ドラッグ&ドロップで旅程作成",
+    "feature2Desc": "カンバン風ボードで日程を整理し、時間の重複もすぐに検知します。",
+    "feature3Title": "費用をきっちり割り勘",
+    "feature3Desc": "誰がいくら支払ったかを記録し、リアルタイムで自動精算します。",
+    "footer": "© 2026 WanderPlan. 一緒に旅を計画する人のために。"
+  },
+  "dashboard": {
+    "welcome": "おかえりなさい、{{name}}さん",
+    "overview": "今後の旅行の概要はこちらです。",
+    "noTrips": "旅行はまだありません",
+    "noTripsDescription": "旅程管理機能が今後のスプリントでリリースされると、計画した旅行がここに表示されます。"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "logout": "ログアウト"
+  },
+  "language": {
+    "label": "言語",
+    "en": "English",
+    "ja": "日本語",
+    "vi": "Tiếng Việt"
+  }
+}
