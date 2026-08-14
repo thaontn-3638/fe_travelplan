@@ -62,14 +62,14 @@ export default function WelcomePage() {
 
       <div className="relative">
         <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-          <div className="flex items-center gap-2">
+          <RouterLink to="/" className="flex items-center gap-2 no-underline">
             <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
               <FlightTakeoffRoundedIcon fontSize="small" />
             </Avatar>
             <Typography variant="h6" className="font-bold">
               WanderPlan
             </Typography>
-          </div>
+          </RouterLink>
 
           <div className="flex items-center gap-2">
             <LanguageSwitcher />

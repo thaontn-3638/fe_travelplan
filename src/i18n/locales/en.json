@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "WanderPlan"
+    "appName": "WanderPlan",
+    "close": "Close"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -49,11 +50,73 @@
     "welcome": "Welcome back, {{name}}",
     "overview": "Here's an overview of your upcoming trips.",
     "noTrips": "No trips yet",
-    "noTripsDescription": "Your planned trips will show up here once trip management ships in a later sprint."
+    "noTripsDescription": "Your planned trips will show up here once trip management ships in a later sprint.",
+    "greeting": {
+      "endingToday": "{{title}} wraps up today.",
+      "pendingSettlement": "{{title}} still has an unsettled bill."
+    },
+    "countdown": {
+      "unit": "days",
+      "caption": "until your next trip",
+      "empty": "No trips scheduled yet"
+    },
+    "stats": {
+      "tripCount": "Trips",
+      "thisMonth": "This month",
+      "totalBudget": "Total budget",
+      "savedPlaces": "Saved places"
+    },
+    "sections": {
+      "upcoming": "Upcoming itinerary",
+      "openItinerary": "Open itinerary →",
+      "allTrips": "All trips",
+      "viewAll": "View all →"
+    },
+    "search": {
+      "results": "Search results",
+      "noResults": "No trips found for \"{{query}}\""
+    },
+    "boardingPass": {
+      "destination": "Destination",
+      "dates": "Dates",
+      "travelers": "Travelers",
+      "budgetUsed": "Budget used"
+    },
+    "status": {
+      "idea": "Idea",
+      "planning": "Planning",
+      "confirmed": "Confirmed",
+      "ongoing": "Ongoing",
+      "settling": "Settling up",
+      "done": "Done"
+    },
+    "trip": {
+      "travelers_one": "{{count}} traveler",
+      "travelers_other": "{{count}} travelers",
+      "travelersUndecided": "TBD",
+      "budgetNotSet": "Budget not set",
+      "addNew": "Create a new trip"
+    },
+    "trips": {
+      "t1": { "title": "Kyoto 3-Day Trip", "subtitle": "Group trip - sightseeing and food", "destination": "Kyoto" },
+      "t2": { "title": "Okinawa & Ishigaki", "subtitle": "Relaxed island beach getaway", "destination": "Okinawa" },
+      "t3": { "title": "Taipei Quick Getaway", "subtitle": "Street food and night markets", "destination": "Taipei, Taiwan" },
+      "t4": { "title": "Osaka Day-Trip Food Tour", "subtitle": "One day of eating our way through Osaka", "destination": "Osaka" },
+      "t5": { "title": "Seoul Food Tour", "subtitle": "Foodie trip with friends", "destination": "Seoul, South Korea" },
+      "t6": { "title": "Hokkaido Ski Trip", "subtitle": "Just an idea - details TBD", "destination": "Hokkaido" }
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
-    "logout": "Logout"
+    "logout": "Logout",
+    "itinerary": "Itinerary",
+    "discover": "Discover",
+    "settlement": "Settlement",
+    "settings": "Settings",
+    "searchPlaceholder": "Search trips",
+    "newTrip": "Create new trip",
+    "comingSoon": "Coming soon",
+    "accountMenu": "Account menu"
   },
   "language": {
     "label": "Language",
