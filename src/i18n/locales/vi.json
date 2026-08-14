@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "WanderPlan"
+    "appName": "WanderPlan",
+    "close": "Đóng"
   },
   "auth": {
     "welcomeBack": "Chào mừng trở lại",
@@ -49,11 +50,72 @@
     "welcome": "Chào mừng trở lại, {{name}}",
     "overview": "Đây là tổng quan các chuyến đi sắp tới của bạn.",
     "noTrips": "Chưa có chuyến đi nào",
-    "noTripsDescription": "Các chuyến đi bạn lên kế hoạch sẽ hiển thị ở đây khi tính năng quản lý chuyến đi ra mắt ở sprint sau."
+    "noTripsDescription": "Các chuyến đi bạn lên kế hoạch sẽ hiển thị ở đây khi tính năng quản lý chuyến đi ra mắt ở sprint sau.",
+    "greeting": {
+      "endingToday": "{{title}} kết thúc vào hôm nay.",
+      "pendingSettlement": "{{title}} vẫn chưa hoàn tất chia tiền."
+    },
+    "countdown": {
+      "unit": "ngày nữa",
+      "caption": "đến chuyến đi tiếp theo",
+      "empty": "Chưa có chuyến đi nào được lên lịch"
+    },
+    "stats": {
+      "tripCount": "Số chuyến đi",
+      "thisMonth": "Trong tháng này",
+      "totalBudget": "Tổng ngân sách",
+      "savedPlaces": "Địa điểm đã lưu"
+    },
+    "sections": {
+      "upcoming": "Lịch trình sắp tới",
+      "openItinerary": "Mở lịch trình →",
+      "allTrips": "Tất cả chuyến đi",
+      "viewAll": "Xem tất cả →"
+    },
+    "search": {
+      "results": "Kết quả tìm kiếm",
+      "noResults": "Không tìm thấy chuyến đi nào cho \"{{query}}\""
+    },
+    "boardingPass": {
+      "destination": "Điểm đến",
+      "dates": "Thời gian",
+      "travelers": "Người tham gia",
+      "budgetUsed": "Ngân sách đã dùng"
+    },
+    "status": {
+      "idea": "Ý tưởng",
+      "planning": "Đang lên kế hoạch",
+      "confirmed": "Đã xác nhận",
+      "ongoing": "Đang diễn ra",
+      "settling": "Đang chia tiền",
+      "done": "Đã hoàn tất"
+    },
+    "trip": {
+      "travelers_other": "{{count}} người",
+      "travelersUndecided": "Chưa xác định",
+      "budgetNotSet": "Chưa đặt ngân sách",
+      "addNew": "Tạo chuyến đi mới"
+    },
+    "trips": {
+      "t1": { "title": "Kyoto 3 ngày 2 đêm", "subtitle": "Đi nhóm - tham quan và ẩm thực", "destination": "Kyoto" },
+      "t2": { "title": "Okinawa & Ishigaki", "subtitle": "Nghỉ dưỡng biển đảo thư thái", "destination": "Okinawa" },
+      "t3": { "title": "Đài Bắc siêu tốc", "subtitle": "Ẩm thực đường phố và chợ đêm", "destination": "Đài Bắc, Đài Loan" },
+      "t4": { "title": "Osaka - Ăn xuyên ngày", "subtitle": "Một ngày ăn khắp Osaka", "destination": "Osaka" },
+      "t5": { "title": "Seoul Food Tour", "subtitle": "Chuyến đi ẩm thực cùng bạn bè", "destination": "Seoul, Hàn Quốc" },
+      "t6": { "title": "Trượt tuyết Hokkaido", "subtitle": "Mới chỉ là ý tưởng - chưa có chi tiết", "destination": "Hokkaido" }
+    }
   },
   "nav": {
     "dashboard": "Bảng điều khiển",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "itinerary": "Lịch trình",
+    "discover": "Khám phá",
+    "settlement": "Chia tiền",
+    "settings": "Cài đặt",
+    "searchPlaceholder": "Tìm chuyến đi",
+    "newTrip": "Tạo chuyến đi mới",
+    "comingSoon": "Sắp ra mắt",
+    "accountMenu": "Menu tài khoản"
   },
   "language": {
     "label": "Ngôn ngữ",

@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "WanderPlan"
+    "appName": "WanderPlan",
+    "close": "閉じる"
   },
   "auth": {
     "welcomeBack": "おかえりなさい",
@@ -49,11 +50,73 @@
     "welcome": "おかえりなさい、{{name}}さん",
     "overview": "今後の旅行の概要はこちらです。",
     "noTrips": "旅行はまだありません",
-    "noTripsDescription": "旅程管理機能が今後のスプリントでリリースされると、計画した旅行がここに表示されます。"
+    "noTripsDescription": "旅程管理機能が今後のスプリントでリリースされると、計画した旅行がここに表示されます。",
+    "greeting": {
+      "endingToday": "{{title}}は本日が最終日です。",
+      "pendingSettlement": "{{title}}の精算がまだ完了していません。"
+    },
+    "countdown": {
+      "unit": "日後",
+      "caption": "次の旅の出発まで",
+      "empty": "予定されている旅行はありません"
+    },
+    "stats": {
+      "tripCount": "旅行数",
+      "thisMonth": "今月の予定",
+      "totalBudget": "合計予算",
+      "savedPlaces": "保存した場所"
+    },
+    "sections": {
+      "upcoming": "直近の旅程",
+      "openItinerary": "旅程を開く →",
+      "allTrips": "すべての旅行",
+      "viewAll": "すべて見る →"
+    },
+    "search": {
+      "results": "検索結果",
+      "noResults": "「{{query}}」に一致する旅行は見つかりませんでした"
+    },
+    "boardingPass": {
+      "destination": "行き先",
+      "dates": "日程",
+      "travelers": "旅行者",
+      "budgetUsed": "予算消化率"
+    },
+    "status": {
+      "idea": "アイデア",
+      "planning": "計画中",
+      "confirmed": "確定",
+      "ongoing": "旅行中",
+      "settling": "精算待ち",
+      "done": "完了"
+    },
+    "trip": {
+      "travelers_one": "{{count}}人",
+      "travelers_other": "{{count}}人",
+      "travelersUndecided": "未定",
+      "budgetNotSet": "予算未設定",
+      "addNew": "新しい旅行を作成"
+    },
+    "trips": {
+      "t1": { "title": "京都 3日間の旅", "subtitle": "グループ旅行・観光とグルメ中心", "destination": "京都府" },
+      "t2": { "title": "沖縄・石垣島", "subtitle": "離島でのんびりビーチ休暇", "destination": "沖縄県" },
+      "t3": { "title": "台北弾丸旅行", "subtitle": "弾丸グルメ＆夜市めぐり", "destination": "台湾・台北" },
+      "t4": { "title": "大阪日帰りグルメ旅", "subtitle": "日帰りで食べ歩き", "destination": "大阪府" },
+      "t5": { "title": "ソウルグルメツアー", "subtitle": "友人とのグルメ旅行", "destination": "韓国・ソウル" },
+      "t6": { "title": "北海道スキー旅行", "subtitle": "アイデア段階・詳細未定", "destination": "北海道" }
+    }
   },
   "nav": {
     "dashboard": "ダッシュボード",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "itinerary": "旅程",
+    "discover": "行き先を探す",
+    "settlement": "精算",
+    "settings": "設定",
+    "searchPlaceholder": "旅行を検索",
+    "newTrip": "新しい旅行を作成",
+    "comingSoon": "近日公開",
+    "accountMenu": "アカウントメニュー"
   },
   "language": {
     "label": "言語",
