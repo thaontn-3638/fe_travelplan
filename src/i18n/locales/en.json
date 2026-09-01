@@ -1,7 +1,8 @@
 {
   "common": {
     "appName": "WanderPlan",
-    "close": "Close"
+    "close": "Close",
+    "cancel": "Cancel"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -106,6 +107,76 @@
       "t6": { "title": "Hokkaido Ski Trip", "subtitle": "Just an idea - details TBD", "destination": "Hokkaido" }
     }
   },
+  "discover": {
+    "title": "Discover places",
+    "subtitle": "Search a place, or add your own if it's not in our catalog yet.",
+    "searchPlaceholder": "Search by name, address, or region…",
+    "trending": "Trending places",
+    "searchResults": "Search results",
+    "categoryAll": "All",
+    "savedOnly": "Saved",
+    "noSavedTitle": "No saved places yet",
+    "noSavedSubtitle": "Places you save show up here.",
+    "descriptionLabel": "About this place",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "goToImage": "Go to image {{index}}",
+    "savedBadge": "Saved",
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Saved — remove",
+    "noResultsTitle": "No places found",
+    "noResultsSubtitle": "We couldn't find \"{{query}}\". Add it as a new place instead?",
+    "addPlaceButton": "Add a new place",
+    "private": "Private",
+    "public": "Public",
+    "ratingNotYet": "Not yet rated",
+    "priceFree": "Free",
+    "category": {
+      "attraction": "Attraction",
+      "restaurant": "Restaurant",
+      "hotel": "Hotel",
+      "shopping": "Shopping",
+      "other": "Other"
+    },
+    "edit": "Edit",
+    "delete": "Delete",
+    "makePrivate": "Make private",
+    "makePublic": "Make public",
+    "guardTooltip": "Someone else has already saved this place, so it can no longer be edited, deleted, or made private.",
+    "placeNotVisible": "This place is private and can no longer be saved.",
+    "deleteConfirmTitle": "Delete this place?",
+    "deleteConfirmBody": "\"{{title}}\" will be permanently removed.",
+    "deleteConfirmAction": "Delete",
+    "form": {
+      "createTitle": "Add a new place",
+      "editTitle": "Edit place",
+      "titleLabel": "Name",
+      "addressLabel": "Address",
+      "regionLabel": "Region / City",
+      "regionPlaceholder": "Search or add a region…",
+      "createRegionOption": "+ Create region \"{{name}}\"",
+      "imagesLabel": "Photos",
+      "imagesRequired": "Add at least one photo",
+      "imageTooLarge": "One or more photos were too large to process and were skipped",
+      "imageBudgetReached": "These photos are already using up the available storage — remove one to add another",
+      "imageProcessingFailed": "One or more photos couldn't be processed (unsupported format?) and were skipped",
+      "addImage": "Add photo",
+      "removeImage": "Remove photo",
+      "categoryRequired": "Choose a category",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "What makes this place worth visiting?",
+      "categoryLabel": "Category",
+      "priceLabel": "Reference price (¥)",
+      "priceInvalid": "Enter a valid non-negative price",
+      "publicLabel": "Public — let others find this place",
+      "publicHelper": "Anyone can find and save a public place. Off by default so new places start private to you.",
+      "submitCreate": "Add place",
+      "submitEdit": "Save changes",
+      "titleRequired": "Name is required",
+      "addressRequired": "Address is required",
+      "regionRequired": "Region is required"
+    }
+  },
   "nav": {
     "dashboard": "Dashboard",
     "logout": "Logout",
@@ -116,7 +187,8 @@
     "searchPlaceholder": "Search trips",
     "newTrip": "Create new trip",
     "comingSoon": "Coming soon",
-    "accountMenu": "Account menu"
+    "accountMenu": "Account menu",
+    "savedPlaces": "Saved places"
   },
   "language": {
     "label": "Language",

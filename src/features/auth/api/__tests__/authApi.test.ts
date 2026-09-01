@@ -105,7 +105,7 @@ describe('authApi', () => {
         if (url.includes('/users?email=')) return Promise.resolve(jsonResponse([]));
         if (url.endsWith('/users') && init?.method === 'POST') {
           capturedBody = init.body as string;
-          return Promise.resolve(jsonResponse({}, true));
+          return Promise.resolve(jsonResponse({ ...JSON.parse(init.body as string), id: 'server-assigned-id' }, true));
         }
         throw new Error(`unexpected fetch: ${url}`);
       });
@@ -118,9 +118,11 @@ describe('authApi', () => {
       });
 
       expect(result.user.email).toBe('new@x.com');
+      expect(result.user.id).toBe('server-assigned-id');
       expect(result.token).toMatch(/^mock-jwt-token-/);
 
-      const sentUser: { password: string } = JSON.parse(capturedBody ?? '{}');
+      const sentUser: { password: string; id?: unknown } = JSON.parse(capturedBody ?? '{}');
+      expect(sentUser.id).toBeUndefined(); // the POST body never invents an id — see the fix's comment
       expect(sentUser.password).not.toBe('secret');
       await expect(bcrypt.compare('secret', sentUser.password)).resolves.toBe(true);
     });

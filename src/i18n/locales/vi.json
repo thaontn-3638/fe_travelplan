@@ -1,7 +1,8 @@
 {
   "common": {
     "appName": "WanderPlan",
-    "close": "Đóng"
+    "close": "Đóng",
+    "cancel": "Huỷ"
   },
   "auth": {
     "welcomeBack": "Chào mừng trở lại",
@@ -105,6 +106,76 @@
       "t6": { "title": "Trượt tuyết Hokkaido", "subtitle": "Mới chỉ là ý tưởng - chưa có chi tiết", "destination": "Hokkaido" }
     }
   },
+  "discover": {
+    "title": "Khám phá địa điểm",
+    "subtitle": "Tìm một địa điểm, hoặc tự thêm mới nếu chưa có trong danh mục.",
+    "searchPlaceholder": "Tìm theo tên, địa chỉ hoặc khu vực…",
+    "trending": "Địa điểm nổi bật",
+    "searchResults": "Kết quả tìm kiếm",
+    "categoryAll": "Tất cả",
+    "savedOnly": "Đã lưu",
+    "noSavedTitle": "Chưa lưu địa điểm nào",
+    "noSavedSubtitle": "Các địa điểm bạn lưu sẽ hiện ở đây.",
+    "descriptionLabel": "Giới thiệu",
+    "previousImage": "Ảnh trước",
+    "nextImage": "Ảnh sau",
+    "goToImage": "Đến ảnh {{index}}",
+    "savedBadge": "Đã lưu",
+    "addToWishlist": "Thêm vào wishlist",
+    "removeFromWishlist": "Đã lưu — bấm để bỏ",
+    "noResultsTitle": "Không tìm thấy địa điểm nào",
+    "noResultsSubtitle": "Không tìm thấy \"{{query}}\". Thêm địa điểm này vào danh sách chứ?",
+    "addPlaceButton": "Thêm địa điểm mới",
+    "private": "Riêng tư",
+    "public": "Công khai",
+    "ratingNotYet": "Chưa có đánh giá",
+    "priceFree": "Miễn phí",
+    "category": {
+      "attraction": "Tham quan",
+      "restaurant": "Ẩm thực",
+      "hotel": "Khách sạn",
+      "shopping": "Mua sắm",
+      "other": "Khác"
+    },
+    "edit": "Sửa",
+    "delete": "Xoá",
+    "makePrivate": "Chuyển sang riêng tư",
+    "makePublic": "Chuyển sang công khai",
+    "guardTooltip": "Địa điểm này đã được người khác lưu, nên không thể sửa, xoá, hoặc chuyển sang riêng tư nữa.",
+    "placeNotVisible": "Địa điểm này đang ở chế độ riêng tư nên không thể lưu được nữa.",
+    "deleteConfirmTitle": "Xoá địa điểm này?",
+    "deleteConfirmBody": "\"{{title}}\" sẽ bị xoá vĩnh viễn.",
+    "deleteConfirmAction": "Xoá",
+    "form": {
+      "createTitle": "Thêm địa điểm mới",
+      "editTitle": "Sửa địa điểm",
+      "titleLabel": "Tên địa điểm",
+      "addressLabel": "Địa chỉ",
+      "regionLabel": "Khu vực / Tỉnh thành",
+      "regionPlaceholder": "Tìm hoặc thêm khu vực…",
+      "createRegionOption": "+ Tạo khu vực \"{{name}}\"",
+      "imagesLabel": "Ảnh",
+      "imagesRequired": "Thêm ít nhất 1 ảnh",
+      "imageTooLarge": "Có ảnh quá lớn để xử lý nên đã bị bỏ qua",
+      "imageBudgetReached": "Đã đạt giới hạn dung lượng ảnh — xoá bớt 1 ảnh để thêm ảnh khác",
+      "imageProcessingFailed": "Có ảnh không xử lý được (định dạng không hỗ trợ?) nên đã bị bỏ qua",
+      "addImage": "Thêm ảnh",
+      "removeImage": "Xoá ảnh",
+      "categoryRequired": "Vui lòng chọn loại địa điểm",
+      "descriptionLabel": "Mô tả",
+      "descriptionPlaceholder": "Điều gì khiến địa điểm này đáng ghé thăm?",
+      "categoryLabel": "Loại địa điểm",
+      "priceLabel": "Giá tham khảo (¥)",
+      "priceInvalid": "Vui lòng nhập giá hợp lệ (không âm)",
+      "publicLabel": "Công khai — cho phép người khác tìm thấy địa điểm này",
+      "publicHelper": "Địa điểm công khai sẽ hiện trong kết quả tìm kiếm của mọi người. Mặc định tắt để địa điểm mới luôn ở chế độ riêng tư trước.",
+      "submitCreate": "Thêm địa điểm",
+      "submitEdit": "Lưu thay đổi",
+      "titleRequired": "Vui lòng nhập tên địa điểm",
+      "addressRequired": "Vui lòng nhập địa chỉ",
+      "regionRequired": "Vui lòng chọn khu vực"
+    }
+  },
   "nav": {
     "dashboard": "Bảng điều khiển",
     "logout": "Đăng xuất",
@@ -115,7 +186,8 @@
     "searchPlaceholder": "Tìm chuyến đi",
     "newTrip": "Tạo chuyến đi mới",
     "comingSoon": "Sắp ra mắt",
-    "accountMenu": "Menu tài khoản"
+    "accountMenu": "Menu tài khoản",
+    "savedPlaces": "Địa điểm đã lưu"
   },
   "language": {
     "label": "Ngôn ngữ",

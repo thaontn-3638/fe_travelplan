@@ -1,8 +1,9 @@
-import { useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Avatar,
+  Badge,
   Divider,
   Drawer,
   IconButton,
@@ -28,10 +29,12 @@ import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
 import ExploreRoundedIcon from '@mui/icons-material/ExploreRounded';
 import PaidRoundedIcon from '@mui/icons-material/PaidRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { toggleSidebar, setSearchQuery } from '../store/slices/uiSlice';
 import { useAuth } from '../features/auth/hooks/useAuth';
+import { useSavedPlaces } from '../features/places/hooks/useSavedPlaces';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { getInitials } from '../utils/formatters';
 import { hexToRgba, palette } from '../theme/palette';
@@ -47,7 +50,7 @@ interface NavItemConfig {
 const NAV_ITEMS: NavItemConfig[] = [
   { labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon fontSize="small" />, path: '/dashboard' },
   { labelKey: 'nav.itinerary', icon: <CalendarMonthRoundedIcon fontSize="small" /> },
-  { labelKey: 'nav.discover', icon: <ExploreRoundedIcon fontSize="small" /> },
+  { labelKey: 'nav.discover', icon: <ExploreRoundedIcon fontSize="small" />, path: '/discover' },
   { labelKey: 'nav.settlement', icon: <PaidRoundedIcon fontSize="small" /> },
   { labelKey: 'nav.settings', icon: <SettingsRoundedIcon fontSize="small" /> },
 ];
@@ -57,6 +60,7 @@ export default function DashboardLayout() {
   const isSidebarOpen = useAppSelector((state) => state.ui.isSidebarOpen);
   const searchQuery = useAppSelector((state) => state.ui.searchQuery);
   const { user, logout } = useAuth();
+  const { count: savedPlacesCount } = useSavedPlaces(user?.id ?? '');
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -65,6 +69,13 @@ export default function DashboardLayout() {
 
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const isMenuOpen = Boolean(menuAnchor);
+
+  const searchPlaceholderKey = location.pathname === '/discover' ? 'discover.searchPlaceholder' : 'nav.searchPlaceholder';
+
+  // Clears the shared search-query slice on route change so it doesn't leak between pages.
+  useEffect(() => {
+    dispatch(setSearchQuery(''));
+  }, [location.pathname, dispatch]);
 
   const handleLogout = (): void => {
     setMenuAnchor(null);
@@ -89,6 +100,7 @@ export default function DashboardLayout() {
             <ListItemButton
               key={item.labelKey}
               disabled={!item.path}
+              onClick={() => item.path && navigate(item.path)}
               title={!item.path ? (t('nav.comingSoon') as string) : undefined}
               sx={{
                 borderRadius: 2.5,
@@ -151,7 +163,7 @@ export default function DashboardLayout() {
 
               <TextField
                 size="small"
-                placeholder={t('nav.searchPlaceholder') ?? ''}
+                placeholder={t(searchPlaceholderKey) ?? ''}
                 value={searchQuery}
                 onChange={(event) => dispatch(setSearchQuery(event.target.value))}
                 className="min-w-0 flex-1 sm:w-[300px] sm:flex-none"
@@ -189,6 +201,16 @@ export default function DashboardLayout() {
             </div>
 
             <div className="flex flex-shrink-0 items-center gap-1">
+              <IconButton
+                onClick={() => navigate('/discover?saved=true')}
+                aria-label={t('nav.savedPlaces') as string}
+                title={t('nav.savedPlaces') as string}
+              >
+                <Badge badgeContent={savedPlacesCount} color="secondary" max={99}>
+                  <BookmarkRoundedIcon />
+                </Badge>
+              </IconButton>
+
               <LanguageSwitcher />
 
               <IconButton
