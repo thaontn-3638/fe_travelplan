@@ -32,10 +32,43 @@ changes, don't just re-derive it once at project start.
     {
       "id": "p1",
       "title": "Tokyo Tower",
-      "coverUrl": "https://example.com/tokyo-tower.jpg",
+      "coverUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Tokyo_Tower_2023.jpg/1280px-Tokyo_Tower_2023.jpg",
+      "images": [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Tokyo_Tower_2023.jpg/1280px-Tokyo_Tower_2023.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Special_observatory.jpg/1280px-Special_observatory.jpg"
+      ],
       "price": 2000,
-      "rating": 4.5
+      "rating": 4.5,
+      "address": "4 Chome-2-8 Shibakoen, Minato City, Tokyo",
+      "lat": 35.6586,
+      "lng": 139.7454,
+      "region": "Tokyo",
+      "country": "Japan",
+      "category": "attraction",
+      "description": "An iconic red-and-white lattice tower inspired by the Eiffel Tower, with an observation deck offering sweeping views over Tokyo.",
+      "aliases": ["東京タワー"],
+      "source": "catalog",
+      "savedCount": 25
+    },
+    {
+      "id": "p_...",
+      "title": "My Secret Cafe",
+      "coverUrl": "https://placehold.co/640x400/DCEEE9/223138?font=roboto&text=My%20Secret%20Cafe",
+      "address": "1 Hidden Alley, Kyoto",
+      "region": "Kyoto",
+      "source": "custom",
+      "isPublic": false,
+      "createdBy": "u1",
+      "createdAt": "2026-08-23T00:00:00Z",
+      "savedCount": 0
     }
+  ],
+  "regions": [
+    { "id": "r1", "name": "Kyoto", "country": "Japan", "aliases": ["京都"], "source": "catalog" },
+    { "id": "r_...", "name": "Neo-Kyoto", "source": "custom", "createdBy": "u1" }
+  ],
+  "savedPlaces": [
+    { "id": "sp1", "userId": "u1", "placeId": "p1", "addedAt": "2026-07-01T09:00:00Z" }
   ],
   "trips": [
     {
@@ -87,6 +120,38 @@ changes, don't just re-derive it once at project start.
 - Full auth flow, session storage strategy, and security caveats are documented
   in `docs/features/auth.md` — this file only tracks the data shape.
 
+**json-server `id` behavior (applies to every collection, not just one):**
+POST always assigns its **own** id and silently discards whatever `id` a
+client sends in the body (`{ ...data, id: randomId() }` in
+`node_modules/json-server/lib/service.js`'s `create()`). Every `createX`
+function in this codebase (`createPlace`, `savePlace`, `createRegion`,
+`mockRegister`) must treat its own POST **response** as the source of truth
+for the created record's id — never the id it put in the request body. This
+was the cause of a real bug (auth's `mockRegister` used to return its
+locally-invented id instead of reading the response; see
+`docs/features/auth.md`'s register-flow note) — same pattern to watch for
+in any new `createX` function.
+
+**Notes on `places` / `regions` / `savedPlaces`:**
+- `places` mixes seeded `source: 'catalog'` rows with user-created
+  `source: 'custom'` ones; visibility, popularity ranking, and the
+  edit/delete guard are documented in `docs/features/place-search.md`, not
+  here.
+- This project pins **json-server v1 (beta)**, whose query syntax
+  (`_sort=-field`, `field:contains=value`) is a rewrite of the classic
+  json-server — see `docs/features/place-search.md`'s API table before
+  assuming `q=`/`_limit`/`_order` work. `searchPlaces`/`searchRegions`
+  (`src/features/places/api/`) fetch the full collection and do all
+  matching (title/address/region/`aliases`, for multi-language search),
+  visibility, and pagination client-side in `utils.ts` — `aliases` is an
+  array field json-server can't substring-match server-side, and the mock
+  catalog is small enough that this is cheap.
+- Catalog `images`/`coverUrl` are real photos fetched from Wikimedia
+  Commons (via each place's English Wikipedia article) at seed time, not
+  hotlinked live — `utils.ts#resolveCoverUrl`'s fallback for a custom place
+  with no photo is `placehold.co` (a generated placeholder, not a photo
+  CDN), chosen after `picsum.photos` turned out to 503 unpredictably.
+
 ## 2. TypeScript Interfaces (`src/types/index.ts`)
 ```ts
 export interface User {
@@ -100,8 +165,38 @@ export interface Place {
   id: string;
   title: string;
   coverUrl: string;
-  price: number;
-  rating: number;
+  price?: number;
+  rating?: number;
+  address: string;
+  lat?: number;
+  lng?: number;
+  region: string;
+  country?: string;
+  category?: string;
+  description?: string;
+  images?: string[]; // gallery for the detail carousel; falls back to [coverUrl] when absent
+  aliases?: string[]; // alternate-language search terms, e.g. a Japanese name
+  source: 'catalog' | 'custom';
+  isPublic?: boolean; // only meaningful when source = 'custom'; default false
+  createdBy?: string; // userId; only when source = 'custom'
+  createdAt?: string; // ISO date; only when source = 'custom'
+  savedCount: number; // default 0 — total times ever added to a saved list, never decremented
+}
+
+export interface SavedPlace {
+  id: string;
+  userId: string;
+  placeId: string;
+  addedAt: string;
+}
+
+export interface Region {
+  id: string;
+  name: string;
+  country?: string;
+  aliases?: string[]; // alternate-language names, e.g. a Japanese name
+  source: 'catalog' | 'custom';
+  createdBy?: string; // userId; only when source = 'custom'
 }
 
 interface BaseActivity {

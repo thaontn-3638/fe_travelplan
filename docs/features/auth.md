@@ -45,8 +45,17 @@ except `token.ts` / `session.ts` / `authStorage.ts`.
    - **Login:** compares the submitted password against the stored bcrypt hash
      with `bcrypt.compare`.
    - **Register:** rejects if the email already exists; otherwise hashes the
-     password with `bcrypt.hash` (10 salt rounds) and `POST`s a new user with a
-     `crypto.randomUUID()`-based id and mock token.
+     password with `bcrypt.hash` (10 salt rounds) and `POST`s a new user
+     (mock token included, no `id` — json-server v1 always assigns its own
+     id on create and silently discards any `id` the client sends, so
+     `mockRegister` reads the real one back from the POST response rather
+     than inventing one locally. It used to invent one — the `AuthResult`
+     returned an id that never matched what was actually stored, which
+     stayed invisible for the rest of that same session but broke on the
+     next login: `mockLogin` correctly looks the account up by email and
+     returns the *real* stored id, so anything saved under the invented one
+     — custom places, wishlist rows — silently stopped matching the moment
+     the user logged back in.).
 4. On success, `useAuth` writes the token + user to storage and dispatches
    `setUser` into Redux. On failure, `mockLogin`/`mockRegister` throw an
    `Error` with a localized message that the page shows inline (`Alert`).

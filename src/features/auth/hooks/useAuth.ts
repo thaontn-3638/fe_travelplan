@@ -5,6 +5,7 @@ import { clearStoredToken, hasStoredToken, storeToken } from '../api/token';
 import { clearStoredUser, storeUser } from '../api/session';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { setUser, clearUser, expireSession, acknowledgeSessionExpired } from '../../../store/slices/authSlice';
+import { resetSavedPlaces } from '../../../store/slices/savedPlacesSlice';
 
 interface UseAuthResult {
   isAuthenticated: boolean;
@@ -56,6 +57,7 @@ export function useAuth(): UseAuthResult {
     clearStoredToken();
     clearStoredUser();
     dispatch(clearUser());
+    dispatch(resetSavedPlaces());
   }, [dispatch]);
 
   const dismissSessionExpired = useCallback((): void => {

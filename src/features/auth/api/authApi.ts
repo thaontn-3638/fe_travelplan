@@ -202,8 +202,7 @@ export async function mockRegister(input: RegisterInput): Promise<AuthResult> {
 
   const mockToken = `mock-jwt-token-${crypto.randomUUID()}`;
   const hashedPassword = await bcrypt.hash(input.password, BCRYPT_SALT_ROUNDS);
-  const newUser: StoredUser = {
-    id: `u_${crypto.randomUUID()}`,
+  const newUser: Omit<StoredUser, 'id'> = {
     email: input.email,
     password: hashedPassword,
     fullName: input.fullName,
@@ -227,5 +226,11 @@ export async function mockRegister(input: RegisterInput): Promise<AuthResult> {
     throw new Error(messages.registrationFailed);
   }
 
-  return { token: mockToken, user: toPublicUser(newUser) };
+  const created: unknown = await response.json();
+
+  if (!isStoredUser(created)) {
+    throw new Error(messages.registrationFailed);
+  }
+
+  return { token: mockToken, user: toPublicUser(created) };
 }

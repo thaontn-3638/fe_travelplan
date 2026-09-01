@@ -1,7 +1,8 @@
 {
   "common": {
     "appName": "WanderPlan",
-    "close": "閉じる"
+    "close": "閉じる",
+    "cancel": "キャンセル"
   },
   "auth": {
     "welcomeBack": "おかえりなさい",
@@ -106,6 +107,76 @@
       "t6": { "title": "北海道スキー旅行", "subtitle": "アイデア段階・詳細未定", "destination": "北海道" }
     }
   },
+  "discover": {
+    "title": "行き先を探す",
+    "subtitle": "場所を検索するか、カタログにまだなければ自分で追加しましょう。",
+    "searchPlaceholder": "名前・住所・地域で検索…",
+    "trending": "人気の場所",
+    "searchResults": "検索結果",
+    "categoryAll": "すべて",
+    "savedOnly": "保存済み",
+    "noSavedTitle": "まだ保存した場所がありません",
+    "noSavedSubtitle": "保存した場所がここに表示されます。",
+    "descriptionLabel": "この場所について",
+    "previousImage": "前の画像",
+    "nextImage": "次の画像",
+    "goToImage": "画像{{index}}へ移動",
+    "savedBadge": "保存済み",
+    "addToWishlist": "ウィッシュリストに追加",
+    "removeFromWishlist": "保存済み — 削除する",
+    "noResultsTitle": "場所が見つかりません",
+    "noResultsSubtitle": "「{{query}}」は見つかりませんでした。新しい場所として追加しますか?",
+    "addPlaceButton": "新しい場所を追加",
+    "private": "非公開",
+    "public": "公開",
+    "ratingNotYet": "評価はまだありません",
+    "priceFree": "無料",
+    "category": {
+      "attraction": "観光スポット",
+      "restaurant": "飲食店",
+      "hotel": "宿泊施設",
+      "shopping": "ショッピング",
+      "other": "その他"
+    },
+    "edit": "編集",
+    "delete": "削除",
+    "makePrivate": "非公開にする",
+    "makePublic": "公開する",
+    "guardTooltip": "この場所はすでに他の人が保存しているため、編集・削除・非公開への変更はできません。",
+    "placeNotVisible": "この場所は非公開のため、保存できません。",
+    "deleteConfirmTitle": "この場所を削除しますか?",
+    "deleteConfirmBody": "「{{title}}」は完全に削除されます。",
+    "deleteConfirmAction": "削除",
+    "form": {
+      "createTitle": "新しい場所を追加",
+      "editTitle": "場所を編集",
+      "titleLabel": "名称",
+      "addressLabel": "住所",
+      "regionLabel": "地域 / 都市",
+      "regionPlaceholder": "地域を検索または追加…",
+      "createRegionOption": "+「{{name}}」を新しい地域として作成",
+      "imagesLabel": "写真",
+      "imagesRequired": "写真を1枚以上追加してください",
+      "imageTooLarge": "サイズが大きすぎて処理できない写真はスキップされました",
+      "imageBudgetReached": "これ以上写真を追加できません — 追加するには他の写真を削除してください",
+      "imageProcessingFailed": "処理できない写真(非対応の形式など)はスキップされました",
+      "addImage": "写真を追加",
+      "removeImage": "写真を削除",
+      "categoryRequired": "カテゴリーを選択してください",
+      "descriptionLabel": "説明",
+      "descriptionPlaceholder": "この場所の魅力を教えてください",
+      "categoryLabel": "カテゴリー",
+      "priceLabel": "参考価格 (¥)",
+      "priceInvalid": "0以上の有効な価格を入力してください",
+      "publicLabel": "公開 — 他のユーザーがこの場所を見つけられるようにする",
+      "publicHelper": "公開すると誰でもこの場所を検索・保存できます。新しく作成した場所は初期状態では非公開です。",
+      "submitCreate": "場所を追加",
+      "submitEdit": "変更を保存",
+      "titleRequired": "名称を入力してください",
+      "addressRequired": "住所を入力してください",
+      "regionRequired": "地域を選択してください"
+    }
+  },
   "nav": {
     "dashboard": "ダッシュボード",
     "logout": "ログアウト",
@@ -116,7 +187,8 @@
     "searchPlaceholder": "旅行を検索",
     "newTrip": "新しい旅行を作成",
     "comingSoon": "近日公開",
-    "accountMenu": "アカウントメニュー"
+    "accountMenu": "アカウントメニュー",
+    "savedPlaces": "保存済みの場所"
   },
   "language": {
     "label": "言語",

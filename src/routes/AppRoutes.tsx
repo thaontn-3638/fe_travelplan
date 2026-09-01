@@ -5,6 +5,7 @@ import WelcomePage from '../pages/WelcomePage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
+import DiscoverPage from '../pages/DiscoverPage';
 import DashboardLayout from '../layouts/DashboardLayout';
 
 export default function AppRoutes() {
@@ -19,6 +20,7 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/discover" element={<DiscoverPage />} />
         </Route>
       </Route>
 
