@@ -2,6 +2,10 @@ export interface FlapStat {
   id: string;
   label: string;
   value: string;
+  // Có `lines` thì hiển thị dạng danh sách chữ thường (mỗi dòng một số) thay
+  // cho kiểu bảng lật — dùng cho tiền nhiều đơn vị: chia đôi "¥2,205,000 + $4,000"
+  // thành hai ô lật trông như hai con số rời rạc khó đọc.
+  lines?: { key: string; label?: string; value: string }[];
   accent: 'ocean' | 'coral' | 'amber' | 'violet';
 }
 
@@ -27,7 +31,7 @@ interface StatFlapBoardProps {
 
 export function StatFlapBoard({ stats }: StatFlapBoardProps) {
   return (
-    <div className="mb-9 grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+    <div className={`mb-9 grid grid-cols-2 gap-3.5 ${stats.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
       {stats.map((stat) => {
         const accent = ACCENT_CLASSES[stat.accent];
 
@@ -36,16 +40,29 @@ export function StatFlapBoard({ stats }: StatFlapBoardProps) {
             <div className={`mb-2.5 text-[11.5px] font-bold uppercase tracking-[0.08em] ${accent.label}`}>
               {stat.label}
             </div>
-            <div className="flex flex-wrap items-center gap-1">
-              {chunkFlapValue(stat.value).map((chunk, index) => (
-                <div
-                  key={index}
-                  className={`relative min-w-[20px] rounded-[5px] px-2 py-1.5 text-center font-mono text-xl font-semibold text-white after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-black/20 ${accent.tile}`}
-                >
-                  {chunk}
-                </div>
-              ))}
-            </div>
+            {stat.lines ? (
+              <ul className="m-0 flex list-none flex-col gap-1 p-0">
+                {stat.lines.map((line) => (
+                  <li key={line.key} className="flex items-baseline justify-between gap-3">
+                    {line.label && (
+                      <span className={`text-[11.5px] font-bold tracking-[0.06em] ${accent.label}`}>{line.label}</span>
+                    )}
+                    <span className="font-mono text-[19px] font-semibold text-ink">{line.value}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="flex flex-wrap items-center gap-1">
+                {chunkFlapValue(stat.value).map((chunk, index) => (
+                  <div
+                    key={index}
+                    className={`relative min-w-[20px] rounded-[5px] px-2 py-1.5 text-center font-mono text-xl font-semibold text-white after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-black/20 ${accent.tile}`}
+                  >
+                    {chunk}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
