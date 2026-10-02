@@ -28,7 +28,6 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded';
 import ExploreRoundedIcon from '@mui/icons-material/ExploreRounded';
 import PaidRoundedIcon from '@mui/icons-material/PaidRounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -44,15 +43,14 @@ const SIDEBAR_WIDTH = 248;
 interface NavItemConfig {
   labelKey: string;
   icon: ReactNode;
-  path?: string;
+  path: string;
 }
 
 const NAV_ITEMS: NavItemConfig[] = [
   { labelKey: 'nav.dashboard', icon: <DashboardRoundedIcon fontSize="small" />, path: '/dashboard' },
-  { labelKey: 'nav.itinerary', icon: <CalendarMonthRoundedIcon fontSize="small" /> },
+  { labelKey: 'nav.itinerary', icon: <CalendarMonthRoundedIcon fontSize="small" />, path: '/itinerary' },
   { labelKey: 'nav.discover', icon: <ExploreRoundedIcon fontSize="small" />, path: '/discover' },
-  { labelKey: 'nav.settlement', icon: <PaidRoundedIcon fontSize="small" /> },
-  { labelKey: 'nav.settings', icon: <SettingsRoundedIcon fontSize="small" /> },
+  { labelKey: 'nav.settlement', icon: <PaidRoundedIcon fontSize="small" />, path: '/settlement' },
 ];
 
 export default function DashboardLayout() {
@@ -70,7 +68,12 @@ export default function DashboardLayout() {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const isMenuOpen = Boolean(menuAnchor);
 
-  const searchPlaceholderKey = location.pathname === '/discover' ? 'discover.searchPlaceholder' : 'nav.searchPlaceholder';
+  // Ô search toàn cục thực chất chỉ Discover dùng; ở các trang khác nó là ô
+  // search chết, và trong wizard nó đụng với ô search của panel địa điểm.
+  // Ô search của Header phục vụ hai màn có danh sách dài: Khám phá và Tính chi
+  // phí. Màn workspace của một chuyến (/settlement/:id) không dùng.
+  const isSettlementHub = location.pathname === '/settlement';
+  const showSearch = location.pathname === '/discover' || isSettlementHub;
 
   // Clears the shared search-query slice on route change so it doesn't leak between pages.
   useEffect(() => {
@@ -94,14 +97,13 @@ export default function DashboardLayout() {
 
       <List className="flex flex-col gap-1 p-0">
         {NAV_ITEMS.map((item) => {
-          const isActive = item.path === location.pathname;
+          const isActive =
+            location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
 
           return (
             <ListItemButton
               key={item.labelKey}
-              disabled={!item.path}
-              onClick={() => item.path && navigate(item.path)}
-              title={!item.path ? (t('nav.comingSoon') as string) : undefined}
+              onClick={() => navigate(item.path)}
               sx={{
                 borderRadius: 2.5,
                 color: isActive ? palette.amber : palette.navySoft,
@@ -109,7 +111,6 @@ export default function DashboardLayout() {
                 '&:hover': {
                   backgroundColor: isActive ? hexToRgba(palette.amber, 0.16) : hexToRgba(palette.white, 0.08),
                 },
-                '&.Mui-disabled': { color: palette.navyMuted, opacity: 1 },
               }}
             >
               <ListItemIcon sx={{ minWidth: 32, color: 'inherit' }}>{item.icon}</ListItemIcon>
@@ -124,9 +125,8 @@ export default function DashboardLayout() {
 
       <button
         type="button"
-        disabled
-        title={t('nav.comingSoon') as string}
-        className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral-dark disabled:cursor-not-allowed disabled:opacity-90"
+        onClick={() => navigate('/itinerary/new')}
+        className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-coral px-4 py-3 text-sm font-semibold text-white transition hover:bg-coral-dark"
       >
         ＋ {t('nav.newTrip')}
       </button>
@@ -155,15 +155,16 @@ export default function DashboardLayout() {
               <IconButton
                 onClick={() => dispatch(toggleSidebar())}
                 edge="start"
-                aria-label="Toggle sidebar"
+                aria-label={t('common.toggleSidebar')}
                 className="flex-shrink-0"
               >
                 <MenuIcon />
               </IconButton>
 
+              {showSearch && (
               <TextField
                 size="small"
-                placeholder={t(searchPlaceholderKey) ?? ''}
+                placeholder={(isSettlementHub ? t('settlement.hub.search') : t('discover.searchPlaceholder')) ?? ''}
                 value={searchQuery}
                 onChange={(event) => dispatch(setSearchQuery(event.target.value))}
                 className="min-w-0 flex-1 sm:w-[300px] sm:flex-none"
@@ -198,6 +199,7 @@ export default function DashboardLayout() {
                   },
                 }}
               />
+              )}
             </div>
 
             <div className="flex flex-shrink-0 items-center gap-1">

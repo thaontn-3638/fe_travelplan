@@ -12,7 +12,7 @@ const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
 };
 
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleSelect = (language: SupportedLanguage): void => {
@@ -24,7 +24,7 @@ export function LanguageSwitcher() {
     <>
       <IconButton
         onClick={(event: MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget)}
-        aria-label="Change language"
+        aria-label={t('common.changeLanguage')}
       >
         <TranslateRoundedIcon fontSize="small" />
       </IconButton>

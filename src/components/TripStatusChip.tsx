@@ -1,23 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { TripStatus } from '../types';
-
-const STATUS_TEXT_CLASSES: Record<TripStatus, string> = {
-  idea: 'text-idea-dark',
-  planning: 'text-amber-dark',
-  confirmed: 'text-ocean-dark',
-  ongoing: 'text-coral-dark',
-  settling: 'text-violet-dark',
-  done: 'text-mint-dark',
-};
-
-const STATUS_TINT_CLASSES: Record<TripStatus, string> = {
-  idea: 'bg-idea-tint',
-  planning: 'bg-amber-tint',
-  confirmed: 'bg-ocean-tint',
-  ongoing: 'bg-coral-tint',
-  settling: 'bg-violet-tint',
-  done: 'bg-mint-tint',
-};
+import { STATUS_TEXT_CLASSES, STATUS_TINT_CLASSES } from './tripStatusColors';
 
 interface TripStatusChipProps {
   status: TripStatus;
