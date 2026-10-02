@@ -9,7 +9,8 @@ import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
 import { useTranslation } from 'react-i18next';
 import type { Place } from '../../../types';
-import { formatCurrencyJPY } from '../../../utils/formatters';
+import type { PlaceAction } from '../api/placeApi';
+import { formatPlacePrice } from '../../../utils/formatters';
 import { resolvePlaceImages } from '../utils';
 import { PlaceImageCarousel } from './PlaceImageCarousel';
 
@@ -17,7 +18,9 @@ interface PlaceDetailPanelProps {
   place: Place;
   saved: boolean;
   isOwnCustom: boolean;
-  canModify: boolean;
+  // Lý do bị chặn của từng thao tác (null = được phép). Chưa tải xong mức độ
+  // sử dụng thì caller truyền lý do "đang kiểm tra" để chặn tạm.
+  blocked: Record<PlaceAction, string | null>;
   wishlistPending?: boolean;
   onToggleSaved: () => void;
   onEdit: () => void;
@@ -25,14 +28,14 @@ interface PlaceDetailPanelProps {
   onToggleVisibility: () => void;
   // Called instead of onEdit/onDelete/onToggleVisibility when blocked — the
   // icon stays clickable (not `disabled`) so it still gives feedback.
-  onGuardedAction: () => void;
+  onGuardedAction: (reason: string) => void;
 }
 
 export function PlaceDetailPanel({
   place,
   saved,
   isOwnCustom,
-  canModify,
+  blocked,
   wishlistPending = false,
   onToggleSaved,
   onEdit,
@@ -41,21 +44,22 @@ export function PlaceDetailPanel({
   onGuardedAction,
 }: PlaceDetailPanelProps) {
   const { t } = useTranslation();
-  const canToggleVisibility = place.isPublic ? canModify : true;
+  // Riêng tư → công khai luôn được; chỉ chiều ngược lại mới bị chặn.
+  const visibilityBlock = place.isPublic ? blocked.makePrivate : null;
 
   function handleEditClick(): void {
-    if (canModify) onEdit();
-    else onGuardedAction();
+    if (blocked.edit) onGuardedAction(blocked.edit);
+    else onEdit();
   }
 
   function handleDeleteClick(): void {
-    if (canModify) onDelete();
-    else onGuardedAction();
+    if (blocked.delete) onGuardedAction(blocked.delete);
+    else onDelete();
   }
 
   function handleVisibilityClick(): void {
-    if (canToggleVisibility) onToggleVisibility();
-    else onGuardedAction();
+    if (visibilityBlock) onGuardedAction(visibilityBlock);
+    else onToggleVisibility();
   }
 
   return (
@@ -80,32 +84,32 @@ export function PlaceDetailPanel({
           <div className="flex flex-shrink-0 flex-col items-end gap-2">
             {isOwnCustom && (
               <div className="flex items-center gap-1">
-                <Tooltip title={t('discover.edit')}>
+                <Tooltip title={blocked.edit ?? t('discover.edit')}>
                   <IconButton
                     size="small"
                     onClick={handleEditClick}
                     aria-label={t('discover.edit') as string}
-                    sx={{ opacity: canModify ? 1 : 0.45 }}
+                    sx={{ opacity: blocked.edit ? 0.45 : 1 }}
                   >
                     <EditRoundedIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={t(place.isPublic ? 'discover.makePrivate' : 'discover.makePublic')}>
+                <Tooltip title={visibilityBlock ?? t(place.isPublic ? 'discover.makePrivate' : 'discover.makePublic')}>
                   <IconButton
                     size="small"
                     onClick={handleVisibilityClick}
                     aria-label={t(place.isPublic ? 'discover.makePrivate' : 'discover.makePublic') as string}
-                    sx={{ opacity: canToggleVisibility ? 1 : 0.45 }}
+                    sx={{ opacity: visibilityBlock ? 0.45 : 1 }}
                   >
                     {place.isPublic ? <PublicRoundedIcon fontSize="small" /> : <LockRoundedIcon fontSize="small" />}
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={t('discover.delete')}>
+                <Tooltip title={blocked.delete ?? t('discover.delete')}>
                   <IconButton
                     size="small"
                     onClick={handleDeleteClick}
                     aria-label={t('discover.delete') as string}
-                    sx={{ opacity: canModify ? 1 : 0.45 }}
+                    sx={{ opacity: blocked.delete ? 0.45 : 1 }}
                   >
                     <DeleteRoundedIcon fontSize="small" />
                   </IconButton>
@@ -136,7 +140,7 @@ export function PlaceDetailPanel({
             <span className="text-ink-soft">{t('discover.ratingNotYet')}</span>
           )}
           <span className="font-mono font-semibold text-ink">
-            {place.price ? formatCurrencyJPY(place.price) : t('discover.priceFree')}
+            {place.price ? formatPlacePrice(place) : t('discover.priceFree')}
           </span>
           {place.category && <Chip size="small" label={t(`discover.category.${place.category}`)} />}
           {isOwnCustom && (

@@ -10,9 +10,9 @@ changes, don't just re-derive it once at project start.
   "users": [
     {
       "id": "u1",
-      "email": "admin@wanderplan.com",
+      "email": "kenji@gmail.com",
       "password": "$2b$10$eO8OywzLjgCUY.fBcPYgbOxyrsgssDjngLdZ78Y1JhhHzCm9RrVWG",
-      "fullName": "Admin User",
+      "fullName": "Kenji Tanaka",
       "phoneNumber": "+84901234567",
       "mockToken": "mock-jwt-token-12345"
     }
@@ -73,34 +73,69 @@ changes, don't just re-derive it once at project start.
   "trips": [
     {
       "id": "t1",
-      "name": "Japan Summer Trip",
-      "budget": 50000,
+      "ownerId": "u1",
+      "name": "Kyoto 5-Day Trip",
+      "regions": [{ "id": "r1", "name": "Kyoto", "country": "Japan" }],
+      "startDate": "2026-09-20",
+      "endDate": "2026-09-24",
+      "status": "planning",
+      "travelers": [
+        { "id": "tv1", "userId": "u1", "fullName": "Kenji Tanaka", "initials": "KT", "colorClass": "bg-ocean" },
+        { "id": "tv2", "fullName": "Bi", "initials": "B", "colorClass": "bg-mint", "isChild": true, "guardianId": "tv1" }
+      ],
+      "party": { "adults": 1, "children": 1 },
+      "currency": "JPY",
+      "budget": null,
+      "budgetPerPerson": 80000,
+      "spent": 12000,
+      "budgetPlan": [
+        { "id": "bn1", "parentId": null, "category": "lodging", "title": "Ryokan", "pricingMode": "lumpSum", "lumpSum": 44000, "quantity": 2, "order": 0 }
+      ],
+      "treasurerId": "tv1",
       "days": [
         {
           "id": "d1",
-          "date": "2026-08-01",
-          "activities": [
-            {
-              "id": "a1",
-              "type": "flight",
-              "title": "Flight to NRT",
-              "flightNo": "JL123",
-              "startTime": "2026-08-01T08:00:00Z",
-              "endTime": "2026-08-01T14:00:00Z",
-              "cost": 15000
-            },
-            {
-              "id": "a2",
-              "type": "place",
-              "title": "Tokyo Tower",
-              "placeId": "p1",
-              "startTime": "2026-08-01T16:00:00Z",
-              "endTime": "2026-08-01T18:00:00Z",
-              "cost": 2000
-            }
+          "date": "2026-09-20",
+          "items": [
+            { "id": "i1", "kind": "place", "placeId": "p1", "startTime": "09:00", "endTime": "11:00", "order": 0, "note": "Đi sớm" },
+            { "id": "i2", "kind": "activity", "title": "Onsen", "category": "other", "startTime": null, "endTime": null, "order": 1 }
           ]
         }
-      ]
+      ],
+      "unscheduledItems": [],
+      "shareToken": "190337c929e34210a6660fd26aa7829d",
+      "shareScope": { "plan": true, "actual": false },
+      "sharedAt": "2026-10-02T02:52:00.000Z",
+      "updatedAt": "2026-10-02T02:52:00.000Z"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "e1",
+      "tripId": "t1",
+      "kind": "expense",
+      "date": "2026-09-20",
+      "category": "food",
+      "title": "Ramen",
+      "amount": 3000,
+      "payerId": "tv1",
+      "splitMode": "equal",
+      "shares": [{ "travelerId": "tv1" }, { "travelerId": "tv2" }],
+      "createdAt": "2026-09-20T12:00:00.000Z",
+      "createdBy": "u1"
+    }
+  ],
+  "expenseHistory": [
+    {
+      "id": "h1",
+      "tripId": "t1",
+      "expenseId": "e1",
+      "action": "update",
+      "at": "2026-09-20T14:00:00.000Z",
+      "userId": "u1",
+      "userName": "Kenji Tanaka",
+      "before": { "kind": "expense", "date": "2026-09-20", "category": "food", "title": "Ramen", "amount": 2700, "payerId": "tv1", "splitMode": "equal", "shares": [{ "travelerId": "tv1" }, { "travelerId": "tv2" }] },
+      "after": { "kind": "expense", "date": "2026-09-20", "category": "food", "title": "Ramen", "amount": 3000, "payerId": "tv1", "splitMode": "equal", "shares": [{ "travelerId": "tv1" }, { "travelerId": "tv2" }] }
     }
   ]
 }
@@ -153,94 +188,78 @@ in any new `createX` function.
   CDN), chosen after `picsum.photos` turned out to 503 unpredictably.
 
 ## 2. TypeScript Interfaces (`src/types/index.ts`)
+Nguồn sự thật là `src/types/index.ts`; tóm tắt các type chính (chi tiết từng
+field + luật nghiệp vụ: `docs/features/trip-board.md` §2 và
+`docs/features/trip-budget.md` §2):
+
 ```ts
-export interface User {
+export type Currency = 'JPY' | 'VND' | 'USD';
+export type TripStatus = 'idea' | 'planning' | 'confirmed' | 'ongoing' | 'settling' | 'done';
+
+export interface ItineraryItem {          // tagged union theo `kind`
   id: string;
-  email: string;
-  fullName: string;
-  phoneNumber: string;
-}
-
-export interface Place {
-  id: string;
-  title: string;
-  coverUrl: string;
-  price?: number;
-  rating?: number;
-  address: string;
-  lat?: number;
-  lng?: number;
-  region: string;
-  country?: string;
-  category?: string;
-  description?: string;
-  images?: string[]; // gallery for the detail carousel; falls back to [coverUrl] when absent
-  aliases?: string[]; // alternate-language search terms, e.g. a Japanese name
-  source: 'catalog' | 'custom';
-  isPublic?: boolean; // only meaningful when source = 'custom'; default false
-  createdBy?: string; // userId; only when source = 'custom'
-  createdAt?: string; // ISO date; only when source = 'custom'
-  savedCount: number; // default 0 — total times ever added to a saved list, never decremented
-}
-
-export interface SavedPlace {
-  id: string;
-  userId: string;
-  placeId: string;
-  addedAt: string;
-}
-
-export interface Region {
-  id: string;
-  name: string;
-  country?: string;
-  aliases?: string[]; // alternate-language names, e.g. a Japanese name
-  source: 'catalog' | 'custom';
-  createdBy?: string; // userId; only when source = 'custom'
-}
-
-interface BaseActivity {
-  id: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  cost: number;
-}
-
-export interface FlightActivity extends BaseActivity {
-  type: 'flight';
-  flightNo: string;
-}
-
-export interface PlaceActivity extends BaseActivity {
-  type: 'place';
-  placeId: string;
-}
-
-export type Activity = FlightActivity | PlaceActivity;
-
-export interface TripDay {
-  id: string;
-  date: string;
-  activities: Activity[];
+  kind: 'place' | 'activity';
+  placeId?: string;                       // kind = 'place'
+  title?: string; category?: string;      // kind = 'activity'
+  startTime: string | null;               // "HH:mm" — cả hai cùng null hoặc cùng có giá trị
+  endTime: string | null;
+  order: number;
+  note?: string;                          // <= 100 ký tự
 }
 
 export interface Trip {
   id: string;
+  ownerId?: string;                       // chủ trip (R14) — optional chỉ cho dữ liệu cũ
   name: string;
-  budget: number;
-  days: TripDay[];
+  regions: TripRegion[];
+  startDate: string; endDate: string | null;
+  status: TripStatus;
+  travelers: Traveler[]; party: PartySize;
+  currency: Currency;
+  budget: number | null; budgetPerPerson: number | null; spent: number;
+  budgetPlan: BudgetNode[]; treasurerId?: string;
+  days: ItineraryDay[]; unscheduledItems: ItineraryItem[];
+  shareToken?: string | null; sharedAt?: string;   // link xem công khai (trip-share.md)
+  shareScope?: { plan: boolean; actual: boolean }; // 2 mức chia sẻ, thiếu = chỉ plan
+  updatedAt: string;
 }
+
+export interface Expense { /* trip-budget.md §2.4 */ }
+export interface ExpenseHistoryEntry { /* trip-budget.md §2.5b — append-only */ }
 ```
 
 **Notes:**
-- `Activity` is a **tagged union** on `type` (`'flight' | 'place'`) — the
+- `ItineraryItem` is a **tagged union** on `kind` (`'place' | 'activity'`) — the
   pattern this project uses for any heterogeneous array (see
-  `docs/01-architecture.md` §2). Adding a new activity kind means adding a new
-  `type` literal + interface here, then a type guard in `src/utils/typeGuards.ts`
-  (see `isFlightActivity` / `isPlaceActivity`).
+  `docs/01-architecture.md` §2). The old `Activity` / `type: 'flight' | 'place'`
+  model was migrated away (`scripts/migrate-trips.mjs`).
 - `User` (public, exported here) is intentionally **not** the same shape as the
   `users` row in `db.json`. `authApi.ts` keeps a private `StoredUser` interface
   (adds `password` + `mockToken`) that never leaves that file — `toPublicUser()`
   strips both fields before the rest of the app ever sees a `User`. Never widen
   the exported `User` type to include auth secrets.
+
+## Trip ownership (2026-10-02)
+
+`Trip.ownerId` (userId của người tạo). Một tài khoản thấy trip khi là chủ **hoặc**
+là thành viên đã gắn tài khoản (`travelers[].userId`) — `canViewTrip()` trong
+`features/itinerary/utils/tripAccess.ts`. json-server không lọc được điều kiện
+"hoặc" nên `getTrips(userId)` lọc ở client; backend thật phải lọc ở server.
+Dữ liệu cũ: chạy `node scripts/migrate-ownership.mjs` (tắt json-server trước).
+
+## Collections thêm sau (2026-10-02)
+
+| Collection / field | Dùng cho | Migration |
+|---|---|---|
+| `expenses` | Khoản chi thực tế + giao dịch quyết toán (`trip-budget.md` §2.4) | có từ trước |
+| `expenseHistory` | Lịch sử thêm / sửa / xoá khoản chi (`trip-budget.md` S10) | `node scripts/migrate-expense-history.mjs [--backfill]` |
+| `Trip.shareToken`, `Trip.sharedAt`, `Trip.shareScope` | Link xem công khai, 2 mức (`trip-share.md`) | không cần — field optional |
+
+json-server v1 **không** tự tạo collection khi POST vào một collection chưa có
+(trả 404), nên collection mới phải có sẵn trong `db.json`. Mọi migration: tắt
+json-server trước khi chạy — server giữ dữ liệu trong bộ nhớ và ghi đè
+`db.json` ở lần ghi kế tiếp.
+
+json-server v1 cũng **bỏ qua** tham số lọc theo field lồng (`?share.token=`) và
+trả về toàn bộ collection — vì vậy `shareToken` là field cấp một, và
+`getSharedTrip()` vẫn lọc lại ở client.

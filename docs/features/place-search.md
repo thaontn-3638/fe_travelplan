@@ -261,7 +261,11 @@ header search query so it doesn't leak into whichever page is opened next.
   the selected place's `PlaceDetailPanel` on the right, both stretched to the
   same height. Row 2, spanning only the left column, holds pagination (MUI
   `Pagination`, centered, shown only when there is more than one page). Below
-  `lg`, the page stacks vertically and scrolls normally.
+  `lg`, the page stacks vertically and scrolls normally, and the detail panel
+  is **not** rendered in the page: tapping a result opens it in a full-screen
+  `Dialog` (title bar + close button). Before this, the panel sat under the
+  whole result list (~2000px down on a phone), so tapping a result looked like
+  it did nothing.
 - **States:**
   - Initial load: centered spinner.
   - Idle (no query, no category, no saved filter): the catalog itself, in
@@ -270,7 +274,10 @@ header search query so it doesn't leak into whichever page is opened next.
     empty state.
   - Zero results otherwise: `SearchEmptyState`, with a button that opens
     `PlaceFormModal` in create mode.
-  - Fetch error: a dismissible `Alert` above the results area.
+  - Fetch error: a dismissible `Alert` above the results area. The text comes
+    from `userErrorMessage()` (`src/utils/errorMessages.ts`) — network / HTTP /
+    unexpected-shape errors map to localized `common.errors.*` messages; raw
+    "Request failed (500)." strings never reach the UI.
 - **Toasts**: a single top-right `Snackbar` (clears the sticky app bar) is
   used for every action failure — a blocked edit/delete/visibility change, a
   save rejected because the place is no longer visible, or any other API
@@ -302,6 +309,26 @@ in-memory result list and auto-selected — it is not automatically added to
 the creator's saved list. On edit, the patched fields are merged into the
 existing place in place.
 
+### Entry points (create)
+
+New users should not have to fail a search to learn they can add a place, so
+the create form is reachable from three places:
+
+| Where | Trigger | Prefill (`PlaceFormPrefill`) |
+| --- | --- | --- |
+| Discover header | Always-visible outlined button "場所を追加" (icon-only `IconButton` on `xs`, tooltip `discover.addPlaceHint`) | `category` = active category filter |
+| Discover empty search result (`SearchEmptyState`) | "場所を追加" button | `title` = trimmed search query, `category` = active filter |
+| Step 2 `PlacePickerPanel` | Link "見つからない？場所を追加" under the list, and a button in the empty state | `title` = picker query, `region` = first trip region, `category` = active filter |
+
+`prefill` is only applied in `create` mode; the modal is remounted with a new
+`key` on every open so a previous draft never leaks into the next one.
+
+In Step 2 the created place is pushed into the board's catalog via
+`usePlaceCatalog().addPlace` (no refetch), the picker switches to the "all" tab
+with the query set to the new title (dropping the trip-region restriction if
+the place is outside the trip's regions), and a snackbar
+(`itinerary.picker.created`) tells the user to drag it or press ＋.
+
 ### Image upload
 
 Images are uploaded from local files (no URL field) via `MultiImageUpload`,
@@ -326,25 +353,35 @@ only resolves inside the browser tab that created it.
 
 Only the creator (`createdBy === currentUserId`) can act on their own custom
 place. Three actions exist: edit its fields, delete it, or flip it from
-public to private. **All three are allowed only while no one else has it
-saved:**
+public to private. Each is guarded by `getPlaceUsage(placeId, userId)` →
+`PlaceUsage { otherSavers, trips, sharedTrips }` and the pure rule
+`placeBlockReason(usage, action)`:
 
-1. `getOtherSavers(placeId, currentUserId)` fetches `GET /savedPlaces?placeId=`
-   and filters out the creator's own row. If anything remains, the place is
-   "in the wild."
-2. If nothing remains, all three are allowed:
-   - **Edit** (`PATCH /places/:id`).
-   - **Delete** (`DELETE /places/:id`) — also removes the creator's own
-     `savedPlaces` row for it, if any (self-cascade only).
-   - **Public → private** (`PATCH /places/:id`) — the other direction
-     (private → public) is always allowed regardless of savers.
+| Action | Blocked when | Reason / message key |
+|---|---|---|
+| **Edit** (`PATCH /places/:id`) | someone else has it saved | `saved` → `discover.guardTooltip` |
+| **Delete** (`DELETE /places/:id`) | someone else has it saved, **or** it is used in **any** trip | `saved` / `inTrip` → `discover.guardInTrip` (with count) |
+| **Public → private** | someone else has it saved, **or** it is used in a trip that someone other than the creator can view (owner ≠ creator, or a linked member ≠ creator) | `saved` / `inSharedTrip` → `discover.guardInSharedTrip` |
+
+- "Used in a trip" = an itinerary item (`days[].items[]` or
+  `unscheduledItems[]`) with that `placeId` (`tripUsesPlace`). Budget nodes'
+  `linkedPlaceId` don't count — it's only a denormalized price reference and
+  the node still renders without the place.
+- Why: deleting (or hiding) a place that a trip references leaves that trip
+  with a "missing place" row for everyone who can see it.
+- Private → public is always allowed. Delete also removes the creator's own
+  `savedPlaces` row for it (self-cascade only).
+- `PlaceDetailPanel` receives `blocked: Record<PlaceAction, string | null>`
+  (reason text or null). Blocked icons stay clickable but greyed out; their
+  tooltip and the click toast show the specific reason. While usage is still
+  loading every action is treated as blocked ("利用状況を確認しています…").
 
 **Enforcement is server-side, not just UI.** `DiscoverPage` disables/greys out
 the Edit, Delete, and visibility-toggle icons for a place it can't currently
 modify, but every mutation (`updatePlace`, `deletePlace`,
 `updatePlaceVisibility` going private) independently re-runs the same
-`getOtherSavers` check inside `placeApi.ts` before writing, throwing
-`PlaceGuardError` if it fails. This means a UI that's briefly stale (e.g. mid
+`getPlaceUsage` + `placeBlockReason` check inside `placeApi.ts` before writing,
+throwing `PlaceGuardError(reason, count)` if it fails. This means a UI that's briefly stale (e.g. mid
 network round trip, or just hasn't refreshed since another user saved the
 place) can never let a blocked mutation through — the client-side check is
 strictly a faster-feedback / greyed-out-icon convenience, not the actual
@@ -356,8 +393,8 @@ UI's guess narrows to "since I last looked at this tab" instead of "since I
 last loaded the page." This is a UX freshness improvement only; it doesn't
 change what the server-side guard allows.
 
-This guard only checks `savedPlaces`. It does not check trip activities,
-since no trip feature references `placeId` yet.
+The trip check loads `GET /trips` (all users' trips) client-side — fine for the
+mock server; a real backend must answer "is this place referenced?" itself.
 
 ## Header integration (`DashboardLayout`)
 

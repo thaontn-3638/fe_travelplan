@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   Dialog,
+  DialogActions,
   DialogContent,
   IconButton,
   MenuItem,
@@ -32,23 +33,32 @@ interface PlaceFormValues {
   isPublic: boolean;
 }
 
+// Giá trị điền sẵn khi TẠO MỚI — ví dụ từ khoá vừa tìm không ra, vùng của
+// chuyến đi đang lên lịch, loại đang lọc. Người dùng không phải gõ lại.
+export interface PlaceFormPrefill {
+  title?: string;
+  region?: string;
+  category?: string;
+}
+
 interface PlaceFormModalProps {
   open: boolean;
   mode: 'create' | 'edit';
   initialPlace?: Place;
+  prefill?: PlaceFormPrefill;
   currentUserId: string;
   submitError: string | null;
   onClose: () => void;
   onSubmit: (input: PlaceInput) => Promise<void>;
 }
 
-function toDefaultValues(place?: Place): PlaceFormValues {
+function toDefaultValues(place?: Place, prefill?: PlaceFormPrefill): PlaceFormValues {
   return {
-    title: place?.title ?? '',
+    title: place?.title ?? prefill?.title ?? '',
     address: place?.address ?? '',
-    region: place?.region ?? '',
+    region: place?.region ?? prefill?.region ?? '',
     images: place?.source === 'custom' ? resolvePlaceImages(place) : [],
-    category: place?.category ?? '',
+    category: place?.category ?? prefill?.category ?? '',
     // typeof, not truthiness — price 0 is a real value, not blank.
     price: typeof place?.price === 'number' ? String(place.price) : '',
     description: place?.description ?? '',
@@ -60,12 +70,14 @@ export function PlaceFormModal({
   open,
   mode,
   initialPlace,
+  prefill,
   currentUserId,
   submitError,
   onClose,
   onSubmit,
 }: PlaceFormModalProps) {
   const { t } = useTranslation();
+  const formId = useId();
 
   const schema = useMemo(
     () =>
@@ -89,7 +101,10 @@ export function PlaceFormModal({
 
   // `values`, not `defaultValues` — keeps the form in sync if a different
   // place is opened for editing without unmounting the dialog.
-  const formValues = useMemo(() => toDefaultValues(initialPlace), [initialPlace]);
+  const formValues = useMemo(
+    () => toDefaultValues(initialPlace, mode === 'create' ? prefill : undefined),
+    [initialPlace, mode, prefill],
+  );
 
   const {
     control,
@@ -129,7 +144,7 @@ export function PlaceFormModal({
       </div>
 
       <DialogContent>
-        <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4" noValidate>
+        <form id={formId} onSubmit={handleSubmit(submit)} className="flex flex-col gap-4 pt-1" noValidate>
           <Controller
             name="title"
             control={control}
@@ -256,17 +271,19 @@ export function PlaceFormModal({
           />
 
           {submitError && <Alert severity="error">{submitError}</Alert>}
-
-          <div className="mt-2 flex justify-end gap-2">
-            <Button variant="text" onClick={onClose} disabled={isSubmitting}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" variant="contained" disabled={isSubmitting}>
-              {mode === 'create' ? t('discover.form.submitCreate') : t('discover.form.submitEdit')}
-            </Button>
-          </div>
         </form>
       </DialogContent>
+
+      {/* Nút nằm ngoài DialogContent nên luôn ghim ở chân modal; form dài
+          thì chỉ phần thân cuộn. Nút submit gắn với form qua thuộc tính form. */}
+      <DialogActions className="border-t border-line px-4 py-3">
+        <Button variant="text" onClick={onClose} disabled={isSubmitting}>
+          {t('common.cancel')}
+        </Button>
+        <Button type="submit" form={formId} variant="contained" disabled={isSubmitting}>
+          {mode === 'create' ? t('discover.form.submitCreate') : t('discover.form.submitEdit')}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

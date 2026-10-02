@@ -1,7 +1,7 @@
-import type { Place, Region, SavedPlace } from '../../../types';
+import type { Place, Region, SavedPlace, Trip } from '../../../types';
 import { isNonEmptyString } from '../../../utils/typeGuards';
 import { filterVisiblePlaces, isPlaceVisibleTo, resolveCoverUrl } from '../utils';
-import { API_BASE_URL, requestJson } from './httpClient';
+import { API_BASE_URL, HttpError, requestJson, requestList } from './httpClient';
 import { searchRegions } from './regionApi';
 
 function isPlace(value: unknown): value is Place {
@@ -18,10 +18,6 @@ function isPlace(value: unknown): value is Place {
     (candidate.source === 'catalog' || candidate.source === 'custom') &&
     typeof candidate.savedCount === 'number'
   );
-}
-
-function isPlaceArray(value: unknown): value is Place[] {
-  return Array.isArray(value) && value.every(isPlace);
 }
 
 function isSavedPlace(value: unknown): value is SavedPlace {
@@ -51,7 +47,7 @@ export interface PlaceCatalog {
 // per currentUserId, filtered/paginated client-side from there (usePlaceSearch).
 export async function fetchPlaceCatalog(currentUserId: string): Promise<PlaceCatalog> {
   const [all, regions] = await Promise.all([
-    requestJson(`${API_BASE_URL}/places?_sort=-savedCount`, isPlaceArray),
+    requestList(`${API_BASE_URL}/places?_sort=-savedCount`, isPlace),
     searchRegions('', currentUserId),
   ]);
 
@@ -95,7 +91,74 @@ export async function createPlace(input: PlaceInput, currentUserId: string): Pro
   });
 }
 
-export class PlaceGuardError extends Error {}
+export type PlaceAction = 'edit' | 'delete' | 'makePrivate';
+export type PlaceBlockReason = 'saved' | 'inTrip' | 'inSharedTrip';
+
+export class PlaceGuardError extends Error {
+  constructor(
+    public readonly reason: PlaceBlockReason = 'saved',
+    public readonly count = 0,
+  ) {
+    super(`Place is locked (${reason}).`);
+    this.name = 'PlaceGuardError';
+  }
+}
+
+// Mức độ "đang được dùng" của một địa điểm tự tạo.
+export interface PlaceUsage {
+  otherSavers: number; // người khác đã lưu
+  trips: number; // trip (của bất kỳ ai) có mục trỏ tới địa điểm này
+  sharedTrips: number; // trong số đó, trip có người khác ngoài người tạo địa điểm cùng xem
+}
+
+type TripLike = Pick<Trip, 'ownerId' | 'travelers' | 'days' | 'unscheduledItems'>;
+
+// Chỉ tính mục lịch trình. `BudgetNode.linkedPlaceId` chỉ là bản denormalize
+// để lấy giá tham khảo — node dự trù vẫn hiển thị được khi địa điểm mất.
+export function tripUsesPlace(trip: TripLike, placeId: string): boolean {
+  return (
+    trip.days.some((day) => day.items.some((item) => item.placeId === placeId)) ||
+    trip.unscheduledItems.some((item) => item.placeId === placeId)
+  );
+}
+
+// Trip mà người khác (ngoài `creatorId`) cũng xem được — địa điểm chuyển sang
+// riêng tư sẽ biến mất khỏi lịch trình của họ thành "địa điểm không tồn tại".
+function isSharedWithOthers(trip: TripLike, creatorId: string): boolean {
+  return (
+    (trip.ownerId !== undefined && trip.ownerId !== creatorId) ||
+    trip.travelers.some((traveler) => traveler.userId !== undefined && traveler.userId !== creatorId)
+  );
+}
+
+function isTripLike(value: unknown): value is TripLike {
+  const v = value as Partial<TripLike> | null;
+  return Boolean(v && Array.isArray(v.days) && Array.isArray(v.unscheduledItems) && Array.isArray(v.travelers));
+}
+
+export async function getPlaceUsage(placeId: string, currentUserId: string): Promise<PlaceUsage> {
+  const [others, trips] = await Promise.all([
+    getOtherSavers(placeId, currentUserId),
+    requestList(`${API_BASE_URL}/trips`, isTripLike),
+  ]);
+  const using = trips.filter((trip) => tripUsesPlace(trip, placeId));
+  return {
+    otherSavers: others.length,
+    trips: using.length,
+    sharedTrips: using.filter((trip) => isSharedWithOthers(trip, currentUserId)).length,
+  };
+}
+
+// Luật chặn (place-search.md "Editing & deleting a custom place"):
+// - người khác đã lưu → không sửa / xoá / chuyển riêng tư
+// - đang nằm trong một trip bất kỳ → không xoá (trip sẽ có mục "không tồn tại")
+// - đang nằm trong trip có người khác cùng xem → không chuyển riêng tư
+export function placeBlockReason(usage: PlaceUsage, action: PlaceAction): PlaceBlockReason | null {
+  if (usage.otherSavers > 0) return 'saved';
+  if (action === 'delete' && usage.trips > 0) return 'inTrip';
+  if (action === 'makePrivate' && usage.sharedTrips > 0) return 'inSharedTrip';
+  return null;
+}
 
 export class PlaceNotVisibleError extends Error {}
 
@@ -110,18 +173,17 @@ export async function getOtherSavers(placeId: string, currentUserId: string): Pr
 
 // Server-side enforcement of the guard — see docs/features/place-search.md's
 // "Editing & deleting a custom place".
-async function assertCanModifyPlace(placeId: string, currentUserId: string): Promise<void> {
-  const others = await getOtherSavers(placeId, currentUserId);
+async function assertCanModifyPlace(placeId: string, currentUserId: string, action: PlaceAction): Promise<void> {
+  const usage = await getPlaceUsage(placeId, currentUserId);
+  const reason = placeBlockReason(usage, action);
 
-  if (others.length > 0) {
-    throw new PlaceGuardError(
-      'Someone else has already saved this place, so it can no longer be edited, deleted, or made private.',
-    );
+  if (reason) {
+    throw new PlaceGuardError(reason, reason === 'inTrip' ? usage.trips : usage.sharedTrips);
   }
 }
 
 export async function updatePlace(placeId: string, patch: Partial<PlaceInput>, currentUserId: string): Promise<Place> {
-  await assertCanModifyPlace(placeId, currentUserId);
+  await assertCanModifyPlace(placeId, currentUserId, patch.isPublic === false ? 'makePrivate' : 'edit');
 
   return requestJson(`${API_BASE_URL}/places/${placeId}`, isPlace, {
     method: 'PATCH',
@@ -133,7 +195,7 @@ export async function updatePlace(placeId: string, patch: Partial<PlaceInput>, c
 export async function updatePlaceVisibility(placeId: string, isPublic: boolean, currentUserId: string): Promise<Place> {
   // Private → public is always allowed; only public → private needs the guard.
   if (!isPublic) {
-    await assertCanModifyPlace(placeId, currentUserId);
+    await assertCanModifyPlace(placeId, currentUserId, 'makePrivate');
   }
 
   return requestJson(`${API_BASE_URL}/places/${placeId}`, isPlace, {
@@ -152,7 +214,7 @@ async function incrementSavedCount(place: Place): Promise<Place> {
 }
 
 export async function deletePlace(placeId: string, currentUserId: string): Promise<void> {
-  await assertCanModifyPlace(placeId, currentUserId);
+  await assertCanModifyPlace(placeId, currentUserId, 'delete');
 
   const ownRow = await requestJson(
     `${API_BASE_URL}/savedPlaces?placeId=${encodeURIComponent(placeId)}&userId=${encodeURIComponent(currentUserId)}`,
@@ -164,7 +226,7 @@ export async function deletePlace(placeId: string, currentUserId: string): Promi
   const response = await fetch(`${API_BASE_URL}/places/${placeId}`, { method: 'DELETE' });
 
   if (!response.ok) {
-    throw new Error(`Request failed (${response.status}).`);
+    throw new HttpError(response.status);
   }
 }
 
@@ -209,6 +271,15 @@ export async function removeSavedPlace(savedPlaceId: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/savedPlaces/${savedPlaceId}`, { method: 'DELETE' });
 
   if (!response.ok) {
-    throw new Error(`Request failed (${response.status}).`);
+    throw new HttpError(response.status);
   }
+}
+
+// Trang chia sẻ công khai: lấy đúng các địa điểm mà trip dùng — kể cả địa
+// điểm riêng tư của chủ trip, vì chủ trip đã chủ động chia sẻ lịch trình này.
+export async function getPlacesByIds(ids: string[]): Promise<Place[]> {
+  if (ids.length === 0) return [];
+  const wanted = new Set(ids);
+  const rows = await requestList(`${API_BASE_URL}/places`, isPlace);
+  return rows.filter((place) => wanted.has(place.id));
 }

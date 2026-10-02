@@ -12,7 +12,7 @@
 - **Mock Backend:** JSON Server (`db.json`), consumed only through `fetch` — no axios.
 - **Password Hashing (mock only):** `bcryptjs` — hashes/compares passwords client-side against `db.json` since JSON Server has no server logic. This is **not** real backend security; it exists to keep the right habits (never store/compare plaintext) ahead of a real backend. See `docs/features/auth.md`.
 - **Testing:** Vitest + `@testing-library/react` + `jsdom`. Run with `npm run test` (single run) or `npm run test:watch`.
-- **Utilities:** dnd-kit (Drag & Drop) and date-fns (date handling) are locked-in choices for the Sprint 3/4 timeline-board work — see `docs/02-features-by-sprint.md` — not yet installed as of this writing.
+- **Utilities:** `@dnd-kit/core` (Drag & Drop, used by the itinerary trip board — see `docs/features/trip-board.md`) and `date-fns` (date handling).
 
 ## 2. Enterprise Standards (G2-High Requirements)
 AI Assistant must strictly follow these rules when generating code:
@@ -63,5 +63,5 @@ Each feature gets a living doc under `docs/features/<feature>.md`, describing th
 **current implementation** (file map, data flow, state shape, known gaps) — as
 opposed to `docs/02-features-by-sprint.md`, which is the original forward-looking
 sprint plan and is not updated as code changes. `docs/features/auth.md` is the
-first example; follow its structure for new features (e.g. `dashboard.md`,
-`trip-board.md` once those land).
+first example; follow its structure for new features — see also
+`dashboard.md`, `place-search.md`, and `trip-board.md`.

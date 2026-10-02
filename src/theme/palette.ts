@@ -23,11 +23,13 @@ export const palette = {
   coral: '#FF6F59',
   coralDark: '#D6503B',
   coralTint: '#FFECE8',
+  coralDeep: '#B8402C',
   coralLight: '#FF8C79',
 
   mint: '#17B899',
   mintDark: '#0E8A73',
   mintTint: '#E1F7F1',
+  mintDeep: '#0B6E5C',
   mintLight: '#3FCBB2',
 
   amber: '#FFB648',

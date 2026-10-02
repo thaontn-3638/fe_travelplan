@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Place } from '../../../types';
+import type { Place, SavedPlace } from '../../../types';
 import { getSavedPlaces, removeSavedPlace as deleteSavedPlaceRow, savePlace } from '../api/placeApi';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { addSavedPlace, removeSavedPlaceRow, setSavedPlaces } from '../../../store/slices/savedPlacesSlice';
 
 interface UseSavedPlacesResult {
+  items: SavedPlace[];
   savedPlaceIds: Set<string>;
   isSaved: (placeId: string) => boolean;
   save: (place: Place) => Promise<Place>;
@@ -99,5 +100,5 @@ export function useSavedPlaces(currentUserId: string): UseSavedPlacesResult {
     [savedPlaces, dispatch],
   );
 
-  return { savedPlaceIds, isSaved, save, remove, removeLocally, loading, count: savedPlaces.length, refresh };
+  return { items: savedPlaces, savedPlaceIds, isSaved, save, remove, removeLocally, loading, count: savedPlaces.length, refresh };
 }

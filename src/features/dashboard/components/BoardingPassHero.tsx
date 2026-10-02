@@ -1,18 +1,25 @@
 import { useTranslation } from 'react-i18next';
-import { formatCurrencyJPY, formatTripDateRange } from '../../../utils/formatters';
-import type { TripSummary } from '../types';
-import { TripCoverIcon } from './TripCoverIcon';
-import { ICON_GRADIENT_STYLE } from './iconGradients';
-import { TripStatusChip } from './TripStatusChip';
-import { TravelerAvatars } from './TravelerAvatars';
+import { formatTripDateRange, formatTripRegions } from '../../../utils/formatters';
+import { formatMoney } from '../../budget/utils/money';
+import { budgetTotal } from '../../budget/utils/budgetRules';
+import type { Place, Trip } from '../../../types';
+import { resolveTripCoverUrl } from '../../itinerary/utils/tripDefaults';
+import { TripStatusChip } from '../../../components/TripStatusChip';
+import { TravelerAvatars } from '../../../components/TravelerAvatars';
 
 interface BoardingPassHeroProps {
-  trip: TripSummary;
+  trip: Trip;
+  placesById: Map<string, Place>;
 }
 
-export function BoardingPassHero({ trip }: BoardingPassHeroProps) {
+export function BoardingPassHero({ trip, placesById }: BoardingPassHeroProps) {
   const { t } = useTranslation();
-  const progress = trip.budget !== null ? Math.min(100, Math.round((trip.spent / trip.budget) * 100)) : 0;
+  const cap = budgetTotal(trip);
+  const progress = cap !== null && cap > 0 ? Math.min(100, Math.round((trip.spent / cap) * 100)) : 0;
+  // Cùng ngưỡng màu với màn 精算 (SettlementHubPage): >80% vàng, vượt thì đỏ.
+  const ratio = cap !== null && cap > 0 ? trip.spent / cap : 0;
+  const over = cap !== null && trip.spent > cap;
+  const barColor = over ? 'bg-coral' : ratio > 0.8 ? 'bg-amber' : 'bg-mint';
 
   return (
     <div className="mb-10 flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-[0_10px_26px_-18px_rgba(29,150,194,0.28)] md:flex-row">
@@ -20,17 +27,13 @@ export function BoardingPassHero({ trip }: BoardingPassHeroProps) {
         <TripStatusChip status={trip.status} className="absolute right-7 top-6" />
 
         <div className="mb-[18px] flex items-center gap-3.5">
-          <div
-            className="flex h-[52px] w-[52px] flex-shrink-0 items-center justify-center rounded-2xl"
-            style={ICON_GRADIENT_STYLE[trip.icon]}
-          >
-            <TripCoverIcon icon={trip.icon} className="h-[26px] w-[26px]" />
-          </div>
+          <img
+            src={resolveTripCoverUrl(trip, placesById)}
+            alt=""
+            className="h-[52px] w-[52px] flex-shrink-0 rounded-2xl object-cover"
+          />
           <div>
-            <h3 className="m-0 font-display text-[22px] font-bold text-ink">{t(`dashboard.trips.${trip.translationKey}.title`)}</h3>
-            <p className="m-0 mt-0.5 text-[13px] text-ink-soft">
-              {t(`dashboard.trips.${trip.translationKey}.subtitle`)}
-            </p>
+            <h3 className="m-0 font-display text-[22px] font-bold text-ink">{trip.name}</h3>
           </div>
         </div>
 
@@ -39,9 +42,7 @@ export function BoardingPassHero({ trip }: BoardingPassHeroProps) {
             <div className="mb-[5px] text-[10.5px] font-bold uppercase tracking-[0.08em] text-ink-soft">
               {t('dashboard.boardingPass.destination')}
             </div>
-            <div className="font-display text-[15px] font-semibold text-ink">
-              {t(`dashboard.trips.${trip.translationKey}.destination`)}
-            </div>
+            <div className="font-display text-[15px] font-semibold text-ink">{formatTripRegions(trip.regions)}</div>
           </div>
           <div>
             <div className="mb-[5px] text-[10.5px] font-bold uppercase tracking-[0.08em] text-ink-soft">
@@ -55,21 +56,26 @@ export function BoardingPassHero({ trip }: BoardingPassHeroProps) {
             <div className="mb-[5px] text-[10.5px] font-bold uppercase tracking-[0.08em] text-ink-soft">
               {t('dashboard.boardingPass.travelers')}
             </div>
-            <TravelerAvatars travelers={trip.travelers} extraCount={trip.extraTravelers} />
+            <TravelerAvatars travelers={trip.travelers} />
           </div>
         </div>
 
-        {trip.budget !== null ? (
+        {cap !== null ? (
           <div className="mt-1">
             <div className="mb-1.5 flex justify-between text-xs text-ink-soft">
               <span>{t('dashboard.boardingPass.budgetUsed')}</span>
               <span className="font-mono">
-                {formatCurrencyJPY(trip.spent)} / {formatCurrencyJPY(trip.budget)}
+                {formatMoney(trip.spent, trip.currency)} / {formatMoney(cap, trip.currency)}
               </span>
             </div>
             <div className="h-[7px] overflow-hidden rounded-full bg-surface">
-              <div className="h-full rounded-full bg-mint" style={{ width: `${progress}%` }} />
+              <div className={`h-full rounded-full ${barColor}`} style={{ width: `${progress}%` }} />
             </div>
+            {over && (
+              <p className="m-0 mt-1 text-[11.5px] font-semibold text-coral-dark">
+                {t('settlement.hub.overPlan', { amount: formatMoney(trip.spent - cap, trip.currency) })}
+              </p>
+            )}
           </div>
         ) : (
           <div className="mt-1 text-xs font-semibold text-ink-soft">{t('dashboard.trip.budgetNotSet')}</div>

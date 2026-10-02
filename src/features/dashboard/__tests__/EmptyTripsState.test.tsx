@@ -8,8 +8,6 @@ describe('EmptyTripsState', () => {
     render(<EmptyTripsState />);
 
     expect(screen.getByText('No trips yet')).toBeTruthy();
-    expect(
-      screen.getByText('Your planned trips will show up here once trip management ships in a later sprint.'),
-    ).toBeTruthy();
+    expect(screen.getByText('Create your first trip to start planning your itinerary.')).toBeTruthy();
   });
 });
