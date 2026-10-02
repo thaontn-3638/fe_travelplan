@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Place, Region } from '../../../types';
 import { fetchPlaceCatalog } from '../api/placeApi';
-import { getErrorMessage } from '../../../utils/typeGuards';
+import { userErrorMessage } from '../../../utils/errorMessages';
 import { matchesCategory, matchesPlaceQuery, paginate } from '../utils';
 import { useDebounce } from './useDebounce';
 
@@ -66,7 +66,7 @@ export function usePlaceSearch(
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setError(getErrorMessage(err));
+        setError(userErrorMessage(err));
         setCatalog(EMPTY_CATALOG);
       })
       .finally(() => {

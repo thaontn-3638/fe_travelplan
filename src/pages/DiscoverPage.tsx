@@ -1,21 +1,27 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { Alert, Button, Chip, CircularProgress, Dialog, DialogContent, Pagination, Snackbar } from '@mui/material';
+import { Alert, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, IconButton, Pagination, Snackbar, Tooltip, useMediaQuery, useTheme } from '@mui/material';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import BookmarkRoundedIcon from '@mui/icons-material/BookmarkRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { useAppSelector } from '../store/hooks';
-import { getErrorMessage } from '../utils/typeGuards';
+import { userErrorMessage } from '../utils/errorMessages';
 import { usePlaceSearch } from '../features/places/hooks/usePlaceSearch';
 import { useSavedPlaces } from '../features/places/hooks/useSavedPlaces';
 import { SearchResultsList } from '../features/places/components/SearchResultsList';
 import { PlaceDetailPanel } from '../features/places/components/PlaceDetailPanel';
 import { SearchEmptyState } from '../features/places/components/SearchEmptyState';
-import { PlaceFormModal } from '../features/places/components/PlaceFormModal';
+import { PlaceFormModal, type PlaceFormPrefill } from '../features/places/components/PlaceFormModal';
 import {
   createPlace,
   deletePlace,
-  getOtherSavers,
+  getPlaceUsage,
+  placeBlockReason,
+  type PlaceAction,
+  type PlaceBlockReason,
+  type PlaceUsage,
   PlaceGuardError,
   PlaceNotVisibleError,
   updatePlace,
@@ -28,6 +34,9 @@ import type { Place } from '../types';
 interface FormModalState {
   open: boolean;
   mode: 'create' | 'edit';
+  // Tăng mỗi lần mở để form tạo mới luôn bắt đầu sạch (không giữ lần trước).
+  key?: number;
+  prefill?: PlaceFormPrefill;
 }
 
 interface Toast {
@@ -87,6 +96,9 @@ export default function DiscoverPage() {
   });
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   useEffect(() => {
     setSelectedId(defaultSelectedId);
   }, [defaultSelectedId]);
@@ -95,23 +107,24 @@ export default function DiscoverPage() {
   const isOwnCustom = Boolean(
     selectedPlace && selectedPlace.source === 'custom' && selectedPlace.createdBy === currentUserId,
   );
-  const [canModifySelected, setCanModifySelected] = useState(false);
+  // null = đang kiểm tra (chặn tạm mọi thao tác sửa cho tới khi biết chắc).
+  const [usage, setUsage] = useState<PlaceUsage | null>(null);
 
   // Returns a cancel fn (same shape as an effect cleanup) so it can also be
   // called directly from the tab-focus effect below.
   const refreshCanModify = useCallback((): (() => void) => {
     if (!selectedPlace || !isOwnCustom) {
-      setCanModifySelected(false);
+      setUsage(null);
       return () => {};
     }
 
     let cancelled = false;
-    getOtherSavers(selectedPlace.id, currentUserId)
-      .then((others) => {
-        if (!cancelled) setCanModifySelected(others.length === 0);
+    getPlaceUsage(selectedPlace.id, currentUserId)
+      .then((result) => {
+        if (!cancelled) setUsage(result);
       })
       .catch(() => {
-        if (!cancelled) setCanModifySelected(false);
+        if (!cancelled) setUsage(null);
       });
 
     return () => {
@@ -121,11 +134,29 @@ export default function DiscoverPage() {
 
   // Resets synchronously on every change (not just the early-return branch)
   // so switching to a different own-custom place can't briefly keep the
-  // previous place's `true` while the new check is still in flight.
+  // previous place's usage while the new check is still in flight.
   useEffect(() => {
-    setCanModifySelected(false);
+    setUsage(null);
     return refreshCanModify();
   }, [refreshCanModify]);
+
+  const blockMessage = useCallback(
+    (reason: PlaceBlockReason | null, count = 0): string | null => {
+      if (reason === 'saved') return t('discover.guardTooltip');
+      if (reason === 'inTrip') return t('discover.guardInTrip', { count });
+      if (reason === 'inSharedTrip') return t('discover.guardInSharedTrip', { count });
+      return null;
+    },
+    [t],
+  );
+
+  const blocked: Record<PlaceAction, string | null> = usage
+    ? {
+        edit: blockMessage(placeBlockReason(usage, 'edit')),
+        delete: blockMessage(placeBlockReason(usage, 'delete'), usage.trips),
+        makePrivate: blockMessage(placeBlockReason(usage, 'makePrivate'), usage.sharedTrips),
+      }
+    : { edit: t('discover.guardChecking'), delete: t('discover.guardChecking'), makePrivate: t('discover.guardChecking') };
 
   // Re-sync on tab focus — see docs/features/place-search.md's "Editing &
   // deleting a custom place" for why this is a UX freshness nicety, not enforcement.
@@ -154,9 +185,9 @@ export default function DiscoverPage() {
   const [toast, setToast] = useState<Toast | null>(null);
 
   function getActionErrorMessage(err: unknown): string {
-    if (err instanceof PlaceGuardError) return t('discover.guardTooltip');
+    if (err instanceof PlaceGuardError) return blockMessage(err.reason, err.count) ?? t('discover.guardTooltip');
     if (err instanceof PlaceNotVisibleError) return t('discover.placeNotVisible');
-    return getErrorMessage(err);
+    return userErrorMessage(err);
   }
 
   function showActionError(err: unknown): void {
@@ -178,6 +209,21 @@ export default function DiscoverPage() {
     } finally {
       setSavePendingId(null);
     }
+  }
+
+  // Mở form tạo mới. Từ trạng thái "không tìm thấy" thì điền sẵn từ khoá vừa
+  // tìm và loại đang lọc; từ nút trên header thì chỉ điền loại đang lọc.
+  function openCreate(fromQuery: boolean): void {
+    setFormError(null);
+    setFormModal({
+      open: true,
+      mode: 'create',
+      key: Date.now(),
+      prefill: {
+        title: fromQuery ? rawQuery.trim() : undefined,
+        category: selectedCategory ?? undefined,
+      },
+    });
   }
 
   async function handleFormSubmit(input: PlaceInput): Promise<void> {
@@ -231,11 +277,54 @@ export default function DiscoverPage() {
   const showEmptyState = !loading && !error && places.length === 0 && !isIdle;
   const showInitialLoading = loading && places.length === 0;
 
+  const detailPanel = selectedPlace ? (
+    <PlaceDetailPanel
+      place={selectedPlace}
+      saved={isSaved(selectedPlace.id)}
+      isOwnCustom={isOwnCustom}
+      blocked={blocked}
+      wishlistPending={savePendingId === selectedPlace.id}
+      onToggleSaved={() => handleToggleSaved(selectedPlace)}
+      onEdit={() => {
+        setFormError(null);
+        setFormModal({ open: true, mode: 'edit' });
+      }}
+      onDelete={() => setDeleteOpen(true)}
+      onToggleVisibility={handleToggleVisibility}
+      onGuardedAction={(reason) => setToast({ message: reason, severity: 'warning' })}
+    />
+  ) : null;
+
   return (
     <div className="flex flex-col lg:h-[calc(100vh-112px)] lg:min-h-[420px] lg:overflow-hidden">
-      <div className="mb-4 flex-shrink-0">
-        <h1 className="m-0 mb-1.5 font-display text-[26px] font-bold text-ink">{t('discover.title')}</h1>
-        <p className="m-0 text-[14.5px] text-ink-soft">{t('discover.subtitle')}</p>
+      <div className="mb-4 flex flex-shrink-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="m-0 mb-1.5 font-display text-[26px] font-bold text-ink">{t('discover.title')}</h1>
+          <p className="m-0 text-[14.5px] text-ink-soft">{t('discover.subtitle')}</p>
+        </div>
+
+        {/* Luôn hiện, không chỉ khi tìm không ra: người mới vào thấy ngay danh
+            sách thịnh hành nên gần như không bao giờ gặp trạng thái rỗng, và
+            sẽ không biết là app cho tự tạo địa điểm. */}
+        <Tooltip title={t('discover.addPlaceHint')}>
+          <span className="flex-shrink-0">
+            <Button
+              variant="outlined"
+              startIcon={<AddRoundedIcon />}
+              onClick={() => openCreate(false)}
+              sx={{ display: { xs: 'none', sm: 'inline-flex' }, borderRadius: '12px', fontWeight: 600 }}
+            >
+              {t('discover.addPlaceHeader')}
+            </Button>
+            <IconButton
+              aria-label={t('discover.addPlaceHeader')}
+              onClick={() => openCreate(false)}
+              sx={{ display: { xs: 'inline-flex', sm: 'none' }, border: 1, borderColor: 'divider' }}
+            >
+              <AddRoundedIcon />
+            </IconButton>
+          </span>
+        </Tooltip>
       </div>
 
       <div className="mb-4 flex flex-shrink-0 flex-wrap items-center gap-2">
@@ -283,7 +372,7 @@ export default function DiscoverPage() {
               <p className="m-0 text-sm text-ink-soft">{t('discover.noSavedSubtitle')}</p>
             </div>
           ) : (
-            <SearchEmptyState query={rawQuery.trim()} onAddPlace={() => setFormModal({ open: true, mode: 'create' })} />
+            <SearchEmptyState query={rawQuery.trim()} onAddPlace={() => openCreate(true)} />
           )
         ) : (
           <>
@@ -300,32 +389,24 @@ export default function DiscoverPage() {
                 <SearchResultsList
                   places={places}
                   selectedId={selectedId}
-                  onSelect={setSelectedId}
+                  onSelect={(id) => {
+                    setSelectedId(id);
+                    if (!isDesktop) setMobileDetailOpen(true);
+                  }}
                   isSaved={isSaved}
                   onToggleSave={handleToggleSaved}
                   savePendingId={savePendingId}
                 />
               </div>
 
-              <div className="min-h-0 lg:overflow-y-auto">
-                {selectedPlace && (
-                  <PlaceDetailPanel
-                    place={selectedPlace}
-                    saved={isSaved(selectedPlace.id)}
-                    isOwnCustom={isOwnCustom}
-                    canModify={canModifySelected}
-                    wishlistPending={savePendingId === selectedPlace.id}
-                    onToggleSaved={() => handleToggleSaved(selectedPlace)}
-                    onEdit={() => {
-                      setFormError(null);
-                      setFormModal({ open: true, mode: 'edit' });
-                    }}
-                    onDelete={() => setDeleteOpen(true)}
-                    onToggleVisibility={handleToggleVisibility}
-                    onGuardedAction={() => setToast({ message: t('discover.guardTooltip'), severity: 'warning' })}
-                  />
-                )}
-              </div>
+              {/* Dưới lg chỉ có một cột: panel chi tiết nằm sau cả danh sách nên
+                  chạm vào kết quả trông như không có gì xảy ra. Ở màn nhỏ chi tiết
+                  mở dạng dialog toàn màn hình (xem bên dưới). */}
+              {isDesktop && (
+                <div className="min-h-0 lg:overflow-y-auto">
+                  {selectedPlace && detailPanel}
+                </div>
+              )}
 
               {pageCount > 1 && (
                 <div className="flex justify-center pt-1">
@@ -337,10 +418,27 @@ export default function DiscoverPage() {
         )}
       </div>
 
+      <Dialog
+        open={!isDesktop && mobileDetailOpen && selectedPlace !== null}
+        onClose={() => setMobileDetailOpen(false)}
+        fullScreen
+        aria-label={selectedPlace?.title}
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-white px-3 py-2">
+          <span className="min-w-0 truncate font-display text-[15px] font-bold text-ink">{selectedPlace?.title}</span>
+          <IconButton onClick={() => setMobileDetailOpen(false)} aria-label={t('common.close')}>
+            <CloseRoundedIcon />
+          </IconButton>
+        </div>
+        <div className="p-4">{selectedPlace && detailPanel}</div>
+      </Dialog>
+
       <PlaceFormModal
+        key={formModal.mode === 'create' ? formModal.key : 'edit'}
         open={formModal.open}
         mode={formModal.mode}
         initialPlace={formModal.mode === 'edit' ? (selectedPlace ?? undefined) : undefined}
+        prefill={formModal.prefill}
         currentUserId={currentUserId}
         submitError={formError}
         onClose={() => setFormModal((state) => ({ ...state, open: false }))}
@@ -353,15 +451,15 @@ export default function DiscoverPage() {
           <p className="m-0 text-sm text-ink-soft">
             {t('discover.deleteConfirmBody', { title: selectedPlace?.title ?? '' })}
           </p>
-          <div className="mt-5 flex justify-end gap-2">
-            <Button variant="text" onClick={() => setDeleteOpen(false)} disabled={deletePending}>
-              {t('common.cancel')}
-            </Button>
-            <Button variant="contained" color="error" onClick={handleConfirmDelete} disabled={deletePending}>
-              {t('discover.deleteConfirmAction')}
-            </Button>
-          </div>
         </DialogContent>
+        <DialogActions className="px-6 pb-4">
+          <Button variant="text" onClick={() => setDeleteOpen(false)} disabled={deletePending}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant="contained" color="error" onClick={handleConfirmDelete} disabled={deletePending}>
+            {t('discover.deleteConfirmAction')}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       <Snackbar

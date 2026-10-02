@@ -6,7 +6,7 @@ import BookmarkBorderRoundedIcon from '@mui/icons-material/BookmarkBorderRounded
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import type { Place } from '../../../types';
-import { formatCurrencyJPY } from '../../../utils/formatters';
+import { formatPlacePrice } from '../../../utils/formatters';
 import { palette } from '../../../theme/palette';
 
 interface PlaceCardProps {
@@ -67,7 +67,7 @@ export function PlaceCard({ place, saved = false, selected = false, savePending 
             </span>
           )}
           <span className="font-mono font-semibold text-ink">
-            {place.price ? formatCurrencyJPY(place.price) : t('discover.priceFree')}
+            {place.price ? formatPlacePrice(place) : t('discover.priceFree')}
           </span>
           {isPrivateCustom && (
             <span className="flex items-center gap-0.5 text-ink-soft" title={t('discover.private') as string}>
