@@ -32,3 +32,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vite ghi file tạm khi đọc vite.config.ts — không bao giờ commit
+vite.config.ts.timestamp-*.mjs
+
+# Bản backup db.json do các script migration tạo ra
+db.before-*.json
+
+# Ảnh chụp / ghi chú do Claude tạo khi review
+Claude outputs/
