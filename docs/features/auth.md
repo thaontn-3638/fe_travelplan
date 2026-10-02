@@ -91,6 +91,14 @@ interface UseAuthResult {
   cached user and sets `sessionExpired: true`, rather than leaving the app in
   a half-authenticated state. An explicit `logout()` call does **not** set
   `sessionExpired` — that flag is only for involuntary expiry.
+- **Per-user caches are cleared on every session change.** `tripsSlice` and
+  `savedPlacesSlice` are not keyed by user, so `login()`, `register()` and the
+  self-heal path all dispatch `resetTrips()` + `resetSavedPlaces()` (not only
+  `logout()`). Otherwise, after an involuntary expiry, the next account to sign
+  in on the same tab would see the previous user's trips until a hard reload.
+- `/share/:token` (public trip view, `trip-share.md`) sits outside both
+  `PublicRoute` and `ProtectedRoute`: guests can open it and signed-in users
+  aren't redirected away from it.
 - `ProtectedRoute` / `PublicRoute` both read `isAuthenticated` from
   `useAuth()`, so they react to Redux state changes instead of only checking
   `localStorage` once per navigation.
