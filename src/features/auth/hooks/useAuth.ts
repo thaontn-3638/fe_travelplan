@@ -6,6 +6,7 @@ import { clearStoredUser, storeUser } from '../api/session';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { setUser, clearUser, expireSession, acknowledgeSessionExpired } from '../../../store/slices/authSlice';
 import { resetSavedPlaces } from '../../../store/slices/savedPlacesSlice';
+import { resetTrips } from '../../../store/slices/tripsSlice';
 
 interface UseAuthResult {
   isAuthenticated: boolean;
@@ -29,6 +30,8 @@ export function useAuth(): UseAuthResult {
   useEffect(() => {
     if (user !== null && !isTokenValid) {
       clearStoredUser();
+      dispatch(resetTrips());
+      dispatch(resetSavedPlaces());
       dispatch(expireSession());
     }
   }, [user, isTokenValid, dispatch]);
@@ -38,6 +41,11 @@ export function useAuth(): UseAuthResult {
       const result = await mockLogin(credentials);
       storeToken(result.token, rememberMe);
       storeUser(result.user, rememberMe);
+      // Cache trip / địa điểm đã lưu không gắn với user: phiên trước hết hạn
+      // (không qua logout) thì người đăng nhập sau sẽ thấy dữ liệu của người
+      // trước. Luôn xoá trước khi vào phiên mới.
+      dispatch(resetTrips());
+      dispatch(resetSavedPlaces());
       dispatch(setUser(result.user));
     },
     [dispatch],
@@ -48,6 +56,8 @@ export function useAuth(): UseAuthResult {
       const result = await mockRegister(input);
       storeToken(result.token, true);
       storeUser(result.user, true);
+      dispatch(resetTrips());
+      dispatch(resetSavedPlaces());
       dispatch(setUser(result.user));
     },
     [dispatch],
@@ -58,6 +68,7 @@ export function useAuth(): UseAuthResult {
     clearStoredUser();
     dispatch(clearUser());
     dispatch(resetSavedPlaces());
+    dispatch(resetTrips());
   }, [dispatch]);
 
   const dismissSessionExpired = useCallback((): void => {

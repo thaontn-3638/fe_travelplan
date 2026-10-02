@@ -10,9 +10,9 @@ const EXISTING_USER_PASSWORD = 'password123';
 
 const existingUser = {
   id: 'u1',
-  email: 'admin@wanderplan.com',
+  email: 'kenji@gmail.com',
   password: bcrypt.hashSync(EXISTING_USER_PASSWORD, 4),
-  fullName: 'Admin User',
+  fullName: 'Kenji Tanaka',
   phoneNumber: '+84901234567',
   mockToken: 'mock-jwt-token-12345',
 };

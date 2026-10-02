@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Avatar, Typography } from '@mui/material';
 import FlightTakeoffRoundedIcon from '@mui/icons-material/FlightTakeoffRounded';
+import { useTranslation } from 'react-i18next';
 
 interface AuthHeaderProps {
   title: ReactNode;
@@ -9,9 +10,10 @@ interface AuthHeaderProps {
 }
 
 export function AuthHeader({ title, subtitle }: AuthHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div className="mb-8 flex flex-col items-center gap-3 text-center">
-      <RouterLink to="/" aria-label="WanderPlan home">
+      <RouterLink to="/" aria-label={t('common.homeLink')}>
         <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
           <FlightTakeoffRoundedIcon fontSize="small" />
         </Avatar>
